@@ -15,26 +15,28 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
   const [previewIntent, setPreviewIntent] = useState(null);
   const [showPreviewPopup, setShowPreviewPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+   const [showDeletePopup, setshowDeletePopup] = useState(false);
+  const [deleteIntentid, setDeleteIntentid] = useState(null);
 
-  const filteredIndividualItems = useMemo(() => 
+  const filteredIndividualItems = useMemo(() =>
     items.filter(item =>
       (item.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       item.item_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       item.product_description?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        item.item_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.product_description?.toLowerCase().includes(searchTerm.toLowerCase())) &&
       !item.bom_id
     ), [items, searchTerm]
   );
 
-  const filteredBomItems = useMemo(() => 
+  const filteredBomItems = useMemo(() =>
     items.filter(item =>
       (item.sku?.toLowerCase().includes(bomSearchTerm.toLowerCase()) ||
-       item.item_code?.toLowerCase().includes(bomSearchTerm.toLowerCase()) ||
-       item.product_description?.toLowerCase().includes(bomSearchTerm.toLowerCase())) &&
+        item.item_code?.toLowerCase().includes(bomSearchTerm.toLowerCase()) ||
+        item.product_description?.toLowerCase().includes(bomSearchTerm.toLowerCase())) &&
       item.bom_id
     ), [items, bomSearchTerm]
   );
 
-  const bomGroups = useMemo(() => 
+  const bomGroups = useMemo(() =>
     filteredBomItems.reduce((groups, item) => {
       const bomName = item.bom_name || 'Uncategorized';
       if (!groups[bomName]) {
@@ -75,8 +77,8 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
       const existingItem = selectedIndividualItems.find(i => i.id === item.id);
       if (!existingItem) {
         const vendorInfo = getItemVendorInfo(item);
-        setSelectedIndividualItems(prev => [...prev, { 
-          ...item, 
+        setSelectedIndividualItems(prev => [...prev, {
+          ...item,
           ...vendorInfo,
           quantity: 1,
           type: 'individual'
@@ -103,8 +105,8 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
       const existingItem = selectedBomItems.find(i => i.id === item.id);
       if (!existingItem) {
         const vendorInfo = getItemVendorInfo(item);
-        setSelectedBomItems(prev => [...prev, { 
-          ...item, 
+        setSelectedBomItems(prev => [...prev, {
+          ...item,
           ...vendorInfo,
           quantity: 1,
           type: 'bom',
@@ -128,10 +130,10 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
   };
 
   const handleSelectAllBomGroup = (bomName, items) => {
-    const itemsToAdd = items.filter(item => 
+    const itemsToAdd = items.filter(item =>
       !selectedBomItems.some(selected => selected.id === item.id)
     );
-    
+
     if (itemsToAdd.length > 0) {
       setSelectedBomItems(prev => [
         ...prev,
@@ -154,7 +156,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
 
   const isBomGroupFullySelected = (items) => {
     if (items.length === 0) return false;
-    return items.every(item => 
+    return items.every(item =>
       selectedBomItems.some(selected => selected.id === item.id)
     );
   };
@@ -200,7 +202,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
         .order('generated_at', { ascending: false });
 
       if (error) throw error;
-      
+
       const parsedData = (data || []).map(intent => {
         let items = [];
         try {
@@ -209,7 +211,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
           console.error('Error parsing items for intent:', intent.intent_number, error);
           items = [];
         }
-        
+
         return {
           ...intent,
           items: items,
@@ -218,7 +220,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
           totalQuantity: parseInt(intent.total_quantity) || 0
         };
       });
-      
+
       setIntentHistory(parsedData);
     } catch (error) {
       console.error('Error fetching intent history:', error);
@@ -228,7 +230,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
 
   const generateIntent = async () => {
     if (isGenerating) return;
-    
+
     if (selectedIndividualItems.length === 0 && selectedBomItems.length === 0) {
       showNotification('Please select at least one item', 'error');
       return;
@@ -238,7 +240,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
 
     try {
       const allItems = [...selectedIndividualItems, ...selectedBomItems];
-      
+
       const aggregatedItems = allItems.reduce((acc, item) => {
         const existing = acc.find(i => i.sku === item.sku);
         if (existing) {
@@ -299,7 +301,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
           items: []
         };
       }
-      
+
       // Ensure all required fields are present with proper naming
       acc[vendorName].items.push({
         id: item.id || `temp-${Date.now()}-${Math.random()}`,
@@ -312,7 +314,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
         vendorName: vendorName,
         totalCost: (parseFloat(item.cost || 0) * parseInt(item.quantity || 1)).toFixed(2)
       });
-      
+
       return acc;
     }, {});
 
@@ -331,6 +333,33 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
       onGeneratePO(formattedIntentData);
     }
   };
+///Delete Each Data in History///
+  const handleDeleteIntent = async () => {
+
+  try {
+    const { error } = await supabase
+      .from("intents")
+      .delete()
+      .eq("id", deleteIntentid);
+
+    if (error) throw error;
+
+    showNotification("Intent deleted successfully!", "success");
+
+    fetchIntentHistory();
+    setDeleteIntentid(null)
+    setshowDeletePopup(false)
+
+  } catch (error) {
+    console.error("Error deleting intent:", error);
+
+    showNotification(
+      "Failed to delete intent",
+      "error"
+    );
+  }
+};
+///Delete Each Data in History///
 
   const generatePDFForSharing = async (intentData, type = 'whatsapp') => {
     const printWindow = window.open('', '_blank');
@@ -348,11 +377,11 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
           .company-header {
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e67e22;
+            border-bottom: 2px solid rgba(29, 29, 30, 0.59)
             padding-bottom: 15px;
           }
           .company-header h1 {
-            color: #e67e22;
+            color: #1846bc;
             margin: 0;
             font-size: 28px;
           }
@@ -366,7 +395,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
             margin-bottom: 20px;
           }
           .intent-header h3 { 
-            color: #e67e22; 
+            color:  #1846bc; 
             margin: 0;
             font-size: 24px;
           }
@@ -390,7 +419,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
             text-align: left;
           }
           .intent-table th { 
-            background-color: #e67e22; 
+            background-color:  #1846bc; 
             color: white;
             font-weight: bold;
           }
@@ -473,16 +502,16 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
       </body>
       </html>
     `;
-    
+
     printWindow.document.write(pdfContent);
     printWindow.document.close();
-    
+
     if (type === 'whatsapp') {
       const message = `Purchase Intent ${intentData.intentNumber}\nTotal: ₹${intentData.totalCost.toFixed(2)}`;
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
     }
-    
+
     printWindow.print();
   };
 
@@ -493,7 +522,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
   const handleShareEmail = () => {
     const subject = `Purchase Intent ${intentData.intentNumber} - KINYA MEDICAL SYSTEM`;
     const body = `Please find the purchase intent attached.\n\nIntent Number: ${intentData.intentNumber}\nTotal Amount: ₹${intentData.totalCost.toFixed(2)}`;
-    
+
     window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   };
 
@@ -505,10 +534,10 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
       `Total Quantity: ${intentData.totalQuantity}\n` +
       `Total Cost: ₹${intentData.totalCost.toFixed(2)}\n\n` +
       `Items:\n` +
-      intentData.items.map((item, index) => 
+      intentData.items.map((item, index) =>
         `${index + 1}. SKU: ${item.sku} | Code: ${item.itemCode || item.item_code} | ${item.productDescription || item.product_description} | Category: ${item.category} | Vendor: ${item.vendorName} | Cost: ₹${item.cost} | Qty: ${item.quantity} | Link: ${item.orderLink || item.order_link || 'N/A'}`
       ).join('\n');
-    
+
     navigator.clipboard.writeText(text).then(() => {
       showNotification('Purchase intent copied to clipboard!', 'success');
     }).catch(err => {
@@ -523,7 +552,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
 
   const handlePreviewIntent = (intent) => {
     console.log('Previewing intent:', intent);
-    
+
     let items = [];
     try {
       if (Array.isArray(intent.items)) {
@@ -584,13 +613,13 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
             <h3>Purchase Intent Generated Successfully!</h3>
             <p>Your purchase intent has been generated and saved to history.</p>
             <div className="intent-popup-actions">
-              <button 
+              <button
                 className="intent-btn intent-btn-primary"
                 onClick={handleCloseSuccessPopup}
               >
                 Continue
               </button>
-              <button 
+              <button
                 className="intent-btn intent-btn-secondary"
                 onClick={() => {
                   handleCloseSuccessPopup();
@@ -598,6 +627,34 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                 }}
               >
                 View History
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+       
+        {showDeletePopup && (
+        <div className="intent-popup-overlay">
+          <div className="intent-popup-content success-popup">
+            <div className="intent-popup-icon delete">
+              <i className="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3>Delete Intent</h3>
+            <p>Are you sure you want to delete this Intent?</p>
+            <div className="intent-popup-actions">
+              <button
+                className="intent-btn intent-btn-secondary"
+                onClick={()=>{setDeleteIntentid(null);
+                  setshowDeletePopup(false)
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="intent-btn intent-btn-danger"
+                onClick={handleDeleteIntent}
+              >
+               Delete
               </button>
             </div>
           </div>
@@ -613,7 +670,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                 <i className="fas fa-file-invoice"></i>
                 Purchase Intent Preview - {previewIntent.intentNumber || 'N/A'}
               </h3>
-              <button 
+              <button
                 className="intent-popup-close"
                 onClick={handleClosePreview}
               >
@@ -665,7 +722,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                           </tr>
                         ))}
                         <tr className="intent-total-row">
-                          <td colSpan="6" style={{textAlign: 'right'}}><strong>Grand Totals:</strong></td>
+                          <td colSpan="6" style={{ textAlign: 'right' }}><strong>Grand Totals:</strong></td>
                           <td className="intent-cost-column">
                             <strong>
                               ₹{previewIntent.items.reduce((sum, item) => sum + parseFloat(item.cost || 0), 0).toFixed(2)}
@@ -694,7 +751,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
               )}
             </div>
             <div className="intent-popup-footer">
-              <button 
+              <button
                 className="intent-btn intent-btn-secondary"
                 onClick={handleClosePreview}
               >
@@ -702,7 +759,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                 Close
               </button>
               {previewIntent.items && previewIntent.items.length > 0 && (
-                <button 
+                <button
                   className="intent-btn intent-btn-primary"
                   onClick={() => {
                     handleUseIntentForPO(previewIntent);
@@ -747,14 +804,14 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
       </div>
 
       <div className="intent-tabs">
-        <button 
+        <button
           className={`intent-tab ${activeTab === 'create' ? 'active' : ''}`}
           onClick={() => setActiveTab('create')}
         >
           <i className="fas fa-plus-circle"></i>
           Create New Intent
         </button>
-        <button 
+        <button
           className={`intent-tab ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
         >
@@ -768,7 +825,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
           <div className="intent-history-header">
             <h3><i className="fas fa-history"></i>Purchase Intent History</h3>
           </div>
-          
+
           <div className="intent-table-container">
             <table className="intent-data-table">
               <thead>
@@ -798,13 +855,28 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                       </td>
                       <td>
                         <div className="intent-action-buttons">
-                          <button 
+
+                          {/* Preview Button */}
+                          <button
                             className="intent-btn-icon view"
                             onClick={() => handlePreviewIntent(intent)}
                             title="Preview Intent"
                           >
                             <i className="fas fa-eye"></i>
                           </button>
+
+                          {/* Delete Button */}
+                          <button
+                            className="intent-btn-icon delete"
+                            onClick={() => {
+                              setDeleteIntentid(intent.id);
+                              setshowDeletePopup(true)
+                            }}
+                            title="Delete Intent"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+
                         </div>
                       </td>
                     </tr>
@@ -884,7 +956,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                         const isSelected = isIndividualItemSelected(item.id);
                         const selectedItem = selectedIndividualItems.find(i => i.id === item.id);
                         const vendorInfo = getItemVendorInfo(item);
-                        
+
                         return (
                           <tr key={item.id} className={isSelected ? 'selected' : ''}>
                             <td>
@@ -942,7 +1014,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                   Object.keys(bomGroups).map(bomName => {
                     const itemsInGroup = bomGroups[bomName];
                     const isGroupFullySelected = isBomGroupFullySelected(itemsInGroup);
-                    
+
                     return (
                       <div key={bomName} className="intent-bom-group">
                         <div className="intent-bom-group-header">
@@ -978,7 +1050,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                                 const isSelected = isBomItemSelected(item.id);
                                 const selectedItem = selectedBomItems.find(i => i.id === item.id);
                                 const vendorInfo = getItemVendorInfo(item);
-                                
+
                                 return (
                                   <tr key={item.id} className={isSelected ? 'selected' : ''}>
                                     <td>
@@ -1056,7 +1128,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                   </div>
                 </div>
               </div>
-              
+
               <div className="intent-selected-items-table">
                 <table className="intent-selection-table">
                   <thead>
@@ -1098,7 +1170,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                         </td>
                         <td>₹{(parseFloat(item.cost) * item.quantity).toFixed(2)}</td>
                         <td>
-                          <button 
+                          <button
                             className="intent-remove-btn"
                             onClick={() => removeIndividualItem(item.id)}
                             title="Remove item"
@@ -1131,7 +1203,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                         </td>
                         <td>₹{(parseFloat(item.cost) * item.quantity).toFixed(2)}</td>
                         <td>
-                          <button 
+                          <button
                             className="intent-remove-btn"
                             onClick={() => removeBomItem(item.id)}
                             title="Remove item"
@@ -1146,8 +1218,8 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
               </div>
 
               <div className="intent-generate-section">
-                <button 
-                  className={`intent-generate-btn ${isGenerating ? 'loading' : ''}`} 
+                <button
+                  className={`intent-generate-btn ${isGenerating ? 'loading' : ''}`}
                   onClick={generateIntent}
                   disabled={isGenerating}
                 >
@@ -1240,7 +1312,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                   </tr>
                 ))}
                 <tr className="intent-total-row">
-                  <td colSpan="6" style={{textAlign: 'right'}}><strong>Grand Totals:</strong></td>
+                  <td colSpan="6" style={{ textAlign: 'right' }}><strong>Grand Totals:</strong></td>
                   <td className="intent-cost-column"><strong>₹{intentData.items.reduce((sum, item) => sum + parseFloat(item.cost), 0).toFixed(2)}</strong></td>
                   <td className="intent-quantity-column"><strong className="intent-total-quantity">{intentData.totalQuantity}</strong></td>
                   <td className="intent-cost-column"><strong>₹{intentData.totalCost.toFixed(2)}</strong></td>

@@ -88,6 +88,24 @@
   margin-bottom: 30px;
 }
 
+.po-card-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  button{
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    background: white;
+  }
+  button:hover{
+     background-color:var(--danger-color);
+     color: white;
+     transform: translateY(-2px);
+     box-shadow: 0 5px 8px 0 rgba(71, 70, 70, 0.386);
+  }
+}
+
 .po-title-section h2 {
   font-size: 28px;
   font-weight: 700;
@@ -118,7 +136,7 @@
 
 .po-stat-card {
   background: var(--gray-100);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -185,7 +203,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-radius: 40px 40px 0 0;
+  border-radius: 15px;
   transition: var(--transition);
   position: relative;
 }
@@ -208,7 +226,8 @@
   content: '';
   position: absolute;
   bottom: -12px;
-  left: 0;
+  width: 30px;
+  left: 40%;
   right: 0;
   height: 2px;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
@@ -225,7 +244,6 @@
 .po-creation-card h3 {
   font-size: 22px;
   font-weight: 600;
-  margin-bottom: 25px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -242,8 +260,8 @@
 }
 
 .po-alert-info {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background:rgba(5, 213, 175, 0.304);
+  color: rgba(36, 34, 34, 0.768);
   padding: 15px 20px;
   border-radius: var(--border-radius-sm);
   display: flex;
@@ -254,7 +272,6 @@
 }
 
 .po-alert-info i {
-  font-size: 20px;
   margin-right: 10px;
 }
 
@@ -264,6 +281,7 @@
   gap: 20px;
 }
 
+/* Navigation Buttons */
 .po-nav-buttons {
   display: flex;
   gap: 10px;
@@ -271,10 +289,10 @@
 
 .po-nav-btn {
   padding: 6px 15px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(94, 91, 91, 0.2);
+  border: 1px solid rgba(28, 27, 27, 0.3);
   border-radius: 40px;
-  color: white;
+  color: rgba(10, 9, 9, 0.829);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -289,6 +307,11 @@
 .po-nav-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.po-nav-btn i {
+  font-size: 12px;
+  margin:0;
 }
 
 /* Form Section */
@@ -485,18 +508,18 @@ textarea.po-form-input {
 }
 
 .po-totals-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: var(--box-shadow);
   border-radius: var(--border-radius-sm);
   padding: 20px;
   width: 300px;
-  color: white;
+  color: rgb(70, 66, 66);
 }
 
 .po-total-row {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(73, 72, 72, 0.2);
 }
 
 .po-total-row:last-child {
@@ -506,9 +529,8 @@ textarea.po-form-input {
 .po-total-row.grand-total {
   font-size: 18px;
   font-weight: 700;
-  margin-top: 8px;
   padding-top: 12px;
-  border-top: 2px solid white;
+  border-top: 2px solid rgb(25, 25, 25);
 }
 
 /* Actions */
@@ -888,13 +910,13 @@ textarea.po-form-input {
   text-align: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 3px solid var(--success-color);
+  border-bottom: 3px solid var(--gray-400);
 }
 
 .po-company-header h1 {
   font-size: 36px;
   font-weight: 800;
-  color: var(--success-color);
+  color: var(--gray-700);
   margin-bottom: 5px;
 }
 
@@ -932,16 +954,20 @@ textarea.po-form-input {
 }
 
 .po-preview-vendor p {
-  font-size: 16px;
-  color: var(--primary-color);
+  font-size: 19px;
+  background-color:rgba(0, 128, 255, 0.141);
+  padding: 8px 1rem  8px 1rem ;
+  color: var(--secondary-color);
+  border-radius: var(--border-radius);
 }
 
 .po-preview-details {
-  background: var(--gray-100);
+  background: var(--gray-200);
   padding: 15px;
   border-radius: var(--border-radius-sm);
   margin-bottom: 30px;
   display: flex;
+  justify-content: space-between;
   gap: 30px;
   flex-wrap: wrap;
 }
@@ -958,8 +984,9 @@ textarea.po-form-input {
 /* Preview Table */
 .po-preview-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse ;
   margin-bottom: 30px;
+  border-radius: 10px;
   font-size: 14px;
 }
 
@@ -997,26 +1024,25 @@ textarea.po-form-input {
 }
 
 .po-preview-totals-card {
-  background: linear-gradient(135deg, var(--success-color), #27ae60);
+  box-shadow: var(--box-shadow);
   border-radius: var(--border-radius-sm);
   padding: 20px;
   width: 300px;
-  color: white;
+  color: rgb(50, 48, 48);
 }
 
 .po-preview-total-row {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(56, 55, 55, 0.315);
 }
 
 .po-preview-total-row.grand-total {
   font-size: 18px;
   font-weight: 700;
-  margin-top: 8px;
   padding-top: 12px;
-  border-top: 2px solid white;
+  border-top: 2px solid rgb(21, 20, 20);
   border-bottom: none;
 }
 
@@ -1260,7 +1286,7 @@ textarea.po-form-input {
   display: flex;
   align-items: center;
   gap: 8px;
-  border-radius: 40px 40px 0 0;
+  border-radius: 15px;
   transition: var(--transition);
   position: relative;
 }
@@ -1280,50 +1306,7 @@ textarea.po-form-input {
   box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
 }
 
-.po-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-}
 
-/* Navigation Buttons */
-.po-nav-btn {
-  padding: 8px 20px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 40px;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
-}
-
-.po-nav-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.po-nav-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.po-nav-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.po-nav-btn i {
-  font-size: 12px;
-}
 
 /* Action Buttons */
 .po-actions {
@@ -1584,7 +1567,7 @@ textarea.po-form-input {
 .po-btn.po-btn-primary.po-btn-sm:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: var(--gray-400);
+  background: var(--gray-700);
 }
 
 /* Remove Item Button (for non-intent items) */

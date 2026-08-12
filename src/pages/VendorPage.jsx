@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { supabase } from '../supabase';
 import "./VendorPage.css"
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => {
   const [formData, setFormData] = useState({
@@ -12,11 +13,15 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
   const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
+//Popups
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [vendorToDelete, setVendorToDelete] = useState(null);
+//Popups
   const [pendingStatus, setPendingStatus] = useState('');
 
-  const vendorStats = useMemo(() => ({
+  const vendorStats = useMemo(() => ({  
     total: vendors.length,
     approved: vendors.filter(v => v.status === 'Approved').length,
     pending: vendors.filter(v => v.status === 'Pending').length,
@@ -93,23 +98,24 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
     setEditingId(vendor.id);
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this vendor?')) {
+  const handleDelete = async () => {
       try {
         const { error } = await supabase
           .from('vendors')
           .delete()
-          .eq('id', id);
+          .eq('id', vendorToDelete);
 
         if (error) throw error;
 
         await fetchVendors();
         showNotification('Vendor deleted successfully!', 'success');
+        setShowDeletePopup(false);
+        setVendorToDelete(null)
       } catch (error) {
         console.error('Error deleting vendor:', error);
         showNotification('Error deleting vendor. Please check your connection and try again.', 'error');
       }
-    }
+    
   };
 
   const showStatusChangePopup = (vendor, newStatus) => {
@@ -127,8 +133,8 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
         .update({
           status: pendingStatus,
           updated_at: new Date().toISOString()
-        })
-        .eq('id', selectedVendor.id);
+         })
+         .eq('id', selectedVendor.id);
 
       if (error) throw error;
 
@@ -151,7 +157,7 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
     });
     setEditingId(null);
   }, []);
-
+  
   const getStatusBadgeClass = useCallback((status) => {
     switch (status) {
       case 'Approved': return 'status-approved';
@@ -197,6 +203,45 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
           </div>
         </div>
       )}
+
+    {showDeletePopup && (
+      <div className="vendor-popup-overlay">
+          <div className="vendor-popup-content">
+            <div className="vendor-popup-header">
+              <h3>Delete Vendor</h3>
+              <button 
+                className="vendor-popup-close"
+                onClick={() =>  {setShowDeletePopup(false);
+            setVendorToDelete(null)}}
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="vendor-popup-body">
+              
+      <p>Are you sure you want to delete this vendor?</p>
+            </div>
+            <div className="vendor-popup-actions">
+               <button
+          className="vendor-btn vendor-btn-secondary"
+          onClick={() => {
+            setShowDeletePopup(false);
+            setVendorToDelete(null);
+          }}
+        >
+          Cancel
+        </button>
+              <button
+          className="vendor-btn vendor-btn-danger"
+          onClick={handleDelete}
+        >
+          Delete
+        </button>
+            </div>
+          </div>
+        </div>    
+  
+)}
 
       <div className="vendor-header">
         <div className="vendor-title-section">
@@ -371,7 +416,9 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
                       <i className="fas fa-edit"></i>
                     </button>
                     <button 
-                      onClick={() => handleDelete(vendor.id)} 
+                      onClick={() => {setVendorToDelete(vendor.id);
+                        setShowDeletePopup(true);
+                      }} 
                       className="vendor-btn-icon delete" 
                       title="Delete Vendor"
                     >

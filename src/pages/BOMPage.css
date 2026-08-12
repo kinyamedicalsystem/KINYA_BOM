@@ -112,7 +112,7 @@
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 40px;
+  border-radius: 15px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -120,12 +120,15 @@
   align-items: center;
   gap: 10px;
   transition: var(--transition);
-  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+  i{
+    font-size: 18px;
+  }
+  
 }
 
 .bom-generate-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+  box-shadow: 0 5px 10px rgba(66, 66, 65, 0.4);
 }
 
 /* Stats */
@@ -138,7 +141,7 @@
 
 .bom-stat-card {
   background: var(--gray-100);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -404,7 +407,7 @@
 
 .bom-save-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+  box-shadow: 0 4px 10px rgba(66, 64, 64, 0.3);
 }
 
 .bom-delete-btn {
@@ -696,6 +699,7 @@
   display: flex;
   gap: 12px;
   font-size: 12px;
+  align-items: center;
 }
 
 .bom-item-category {
@@ -1104,29 +1108,6 @@
   font-size: 12px;
 }
 
-.bom-save-btn {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  color: white;
-  border: none;
-  border-radius: 40px;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: var(--transition);
-}
-
-.bom-save-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
-}
-
-.bom-save-btn.small {
-  padding: 6px 12px;
-  font-size: 12px;
-}
 
 .bom-delete-btn {
   padding: 8px 16px;
@@ -1333,15 +1314,7 @@
   font-size: 12px;
 }
 
-.bom-save-btn.small {
-  background: var(--success-color);
-  color: white;
-  border: none;
-}
 
-.bom-save-btn.small:hover {
-  background: #27ae60;
-}
 
 .bom-cancel-btn.small {
   background: var(--gray-200);
@@ -1382,32 +1355,3 @@
   margin-top: 20px;
 }
 
-/* Generate Intent Button */
-.bom-generate-btn {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 40px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: var(--transition);
-  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-
-.bom-generate-btn i {
-  font-size: 18px;
-}
-
-.bom-generate-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
-}
-
-.bom-generate-btn:active {
-  transform: translateY(0);
-}

@@ -16,8 +16,6 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
   const [currentVendorIndex, setCurrentVendorIndex] = useState(0);
   
   // Popup states
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupAction, setPopupAction] = useState(null);
@@ -30,17 +28,6 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
     taxRate: 0
   });
 
-  const showSuccess = (message) => {
-    setPopupMessage(message);
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
-  };
-
-  const showError = (message) => {
-    setPopupMessage(message);
-    setShowErrorPopup(true);
-    setTimeout(() => setShowErrorPopup(false), 4000);
-  };
 
   const showConfirm = (message, action) => {
     setPopupMessage(message);
@@ -140,7 +127,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
     }
     
     setActiveTab('create');
-    showSuccess(`Intent ${intent.intent_number} loaded successfully!`);
+    showNotification(`Intent ${intent.intent_number} loaded successfully!`);
   };
 
   useEffect(() => {
@@ -153,7 +140,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
         setSelectedIntent(intentData);
         setIntentVendors(intentData.vendorsData);
         
-        if (intentData.vendorsData.length > 0) {
+        if(intentData.vendorsData.length > 0) {
           const firstVendor = intentData.vendorsData[0];
           setSelectedVendor(firstVendor.vendorName);
           setPoItems(firstVendor.items || []);
@@ -208,7 +195,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
 
   const handleQuantityChange = (itemId, quantity) => {
     if (quantity < 1) return;
-    
+  
     setPoItems(prev =>
       prev.map(item =>
         item.id === itemId
@@ -256,12 +243,12 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
 
   const handleSavePO = async (status = 'Draft') => {
     if (!selectedVendor) {
-      showError('Please select a vendor');
+      showNotification('Please select a vendor','error');
       return;
     }
 
     if (!poItems || poItems.length === 0) {
-      showError('Please add at least one item to the purchase order');
+      showNotification  ('Please add at least one item to the purchase order','error');
       return;
     }
 
@@ -308,7 +295,6 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
       if (error) throw error;
 
       const successMsg = `Purchase Order ${poNumber} for ${selectedVendor} ${status === 'Draft' ? 'saved as draft' : 'created successfully'}!`;
-      showSuccess(successMsg);
       showNotification(successMsg, 'success');
       
       if (currentVendorIndex < intentVendors.length - 1) {
@@ -324,12 +310,13 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
       await fetchPurchaseOrders();
     } catch (error) {
       console.error('Error saving purchase order:', error);
-      showError(`Error saving purchase order: ${error.message}. Please try again.`);
+      showNotification(`Error saving purchase order: ${error.message}. Please try again.`,'error');
     } finally {
       setIsSaving(false);
     }
   };
 
+  
   const fetchPurchaseOrders = async () => {
     try {
       const { data, error } = await supabase
@@ -372,12 +359,11 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
 
           if (error) throw error;
 
-          showSuccess('Purchase order deleted successfully!');
           showNotification('Purchase order deleted successfully!', 'success');
           await fetchPurchaseOrders();
         } catch (error) {
           console.error('Error deleting purchase order:', error);
-          showError('Error deleting purchase order. Please try again.');
+          showNotification('Error deleting purchase order. Please try again.','error');
         }
       }
     );
@@ -415,7 +401,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
         <title>Purchase Order - ${poData.po_number}</title>
         <style>
           body { 
-            font-family: Arial, sans-serif; 
+            font-family: 'Google', sans-serif; 
             margin: 20px;
             color: #333;
             line-height: 1.4;
@@ -423,11 +409,11 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
           .company-header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 3px solid #27ae60;
+            border-bottom: 2px solid #2527258b;
             padding-bottom: 20px;
           }
           .company-header h1 {
-            color: #27ae60;
+            color: #0a3bafca;
             margin: 0;
             font-size: 28px;
           }
@@ -463,7 +449,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
             text-align: left;
           }
           .po-table th { 
-            background-color: #27ae60; 
+            background-color: #184faedc; 
             color: white;
             font-weight: bold;
           }
@@ -496,7 +482,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
           }
           .footer {
             margin-top: 50px;
-            border-top: 2px solid #27ae60;
+            border-top: 2px solid #3c3e3d96;
             padding-top: 20px;
           }
           .footer-section {
@@ -706,11 +692,10 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
       `Total: ₹${(parseFloat(poData.total_amount || 0)).toFixed(2)}`;
     
     navigator.clipboard.writeText(text).then(() => {
-      showSuccess('Purchase order copied to clipboard!');
       showNotification('Purchase order copied to clipboard!', 'success');
     }).catch(err => {
       console.error('Failed to copy: ', err);
-      showError('Failed to copy to clipboard');
+      showNotification('Failed to copy to clipboard','error');
     });
   };
 
@@ -720,29 +705,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
 
   return (
     <div className="po-page">
-      {/* Popup Components */}
-      {showSuccessPopup && (
-        <div className="po-popup-overlay">
-          <div className="po-popup-content success-popup">
-            <div className="po-popup-icon">
-              <i className="fas fa-check-circle"></i>
-            </div>
-            <p>{popupMessage}</p>
-          </div>
-        </div>
-      )}
-
-      {showErrorPopup && (
-        <div className="po-popup-overlay">
-          <div className="po-popup-content error-popup">
-            <div className="po-popup-icon">
-              <i className="fas fa-exclamation-circle"></i>
-            </div>
-            <p>{popupMessage}</p>
-          </div>
-        </div>
-      )}
-
+      
       {showConfirmPopup && (
         <div className="po-popup-overlay">
           <div className="po-popup-content confirm-popup">
@@ -773,7 +736,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
 
       <div className="po-header">
         <div className="po-title-section">
-          <h2><i className="fas fa-file-purchase-order"></i>Purchase Orders</h2>
+          <h2><i className="fas fa-file-invoice"></i>Purchase Orders</h2>
           <p>Create and manage vendor-based purchase orders</p>
         </div>
       </div>
@@ -831,13 +794,14 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
 
       {activeTab === 'create' && (
         <div className="po-creation-card">
-          <h3><i className="fas fa-file-purchase-order"></i>Create New Purchase Order</h3>
+          <div className='po-card-header'><h3><i className="fas fa-file-purchase-order"></i>Create New Purchase Order</h3> 
+           <button className='po-btn danger' onClick={resetForm}><i className="fa-solid fa-circle-xmark"></i> Cancel</button></div>
           
           {selectedIntent && (
             <div className="po-intent-reference">
               <div className="po-alert-info">
-                <i className="fas fa-info-circle"></i>
-                Creating PO from Intent: <strong>{selectedIntent.intent_number || selectedIntent.intentNumber}</strong>
+                <span><i className="fas fa-info-circle"></i>
+                Creating PO from Intent : <strong> ( {selectedIntent.intent_number || selectedIntent.intentNumber} )</strong></span>
                 <div className="po-vendor-navigation">
                   <span>Vendor {currentVendorIndex + 1} of {intentVendors.length}</span>
                   {intentVendors.length > 1 && (
@@ -1309,7 +1273,6 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
                 )}
               </tbody>
             </table>
-
             <div className="po-preview-totals">
               <div className="po-preview-totals-card">
                 <div className="po-preview-total-row">

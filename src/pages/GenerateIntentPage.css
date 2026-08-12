@@ -56,7 +56,10 @@
   justify-content: center;
   font-size: 30px;
 }
-
+.delete{
+  color: red;
+  background-color: rgb(255, 208, 208);
+}
 .intent-popup-header {
   padding: 20px;
   border-bottom: 1px solid var(--gray-200);
@@ -150,7 +153,7 @@
 
 .intent-stat-card {
   background: var(--gray-100);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -216,7 +219,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-radius: 40px 40px 0 0;
+  border-radius: 15px;
   transition: var(--transition);
   position: relative;
 }
@@ -239,7 +242,8 @@
   content: '';
   position: absolute;
   bottom: -12px;
-  left: 0;
+  left: 40%;
+  width: 30px;
   right: 0;
   height: 2px;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
@@ -248,6 +252,7 @@
 /* Intent History */
 .intent-history {
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .intent-history-header {
@@ -387,7 +392,7 @@
 
 .intent-type-btn {
   flex: 1;
-  padding: 15px;
+  padding: 13px;
   border: 2px solid var(--gray-200);
   background: white;
   border-radius: var(--border-radius);
@@ -413,8 +418,23 @@
 
 .intent-type-btn.active {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border: transparent;
+  color: white;
+}
+
+.intent-type-btn:hover i {
+  transform: scale(1.1);
+}
+
+.intent-type-btn.active {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   border-color: transparent;
   color: white;
+  box-shadow: 0 5px 10px rgba(48, 47, 45, 0.3);
+}
+
+.intent-type-btn.active i {
+  transform: scale(1.1);
 }
 
 /* Search Section */
@@ -596,29 +616,11 @@
 
 /* Selected Preview */
 .intent-selected-preview {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: var(--border-radius);
   padding: 30px;
   margin-top: 30px;
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
-.intent-preview-header {
-  margin-bottom: 20px;
-}
-
-.intent-preview-header h3 {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.intent-preview-header h3 i {
-  font-size: 24px;
-}
 
 .intent-selection-summary {
   display: flex;
@@ -645,6 +647,7 @@
 .intent-selected-items-table {
   overflow-x: auto;
   margin-bottom: 20px;
+  border-radius: 0 0 20px 20px;
 }
 
 /* Type Badge */
@@ -729,7 +732,8 @@
 
 .intent-preview-header {
   padding: 20px;
-  background: linear-gradient(to right, var(--gray-100), white);
+  border-radius: 20px 20px 0 0;
+  background: rgba(180, 179, 179, 0.175);
   border-bottom: 1px solid var(--gray-200);
   display: flex;
   justify-content: space-between;
@@ -1112,69 +1116,8 @@
   font-size: 16px;
 }
 
-/* Type Selector Buttons */
-.intent-type-btn {
-  flex: 1;
-  padding: 16px 24px;
-  border: 2px solid var(--gray-200);
-  background: white;
-  border-radius: var(--border-radius);
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--gray-600);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
 
-.intent-type-btn i {
-  font-size: 28px;
-  transition: transform 0.3s ease;
-}
-
-.intent-type-btn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: var(--box-shadow);
-}
-
-.intent-type-btn:hover i {
-  transform: scale(1.1);
-}
-
-.intent-type-btn.active {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  border-color: transparent;
-  color: white;
-  box-shadow: 0 10px 20px rgba(230, 126, 34, 0.3);
-}
-
-.intent-type-btn.active i {
-  transform: scale(1.1);
-}
-
-/* Tab Buttons */
-.intent-tab {
-  padding: 12px 24px;
-  border: none;
-  background: transparent;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--gray-600);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 40px 40px 0 0;
-  transition: var(--transition);
-  position: relative;
-}
+/* Tab Buttons */ 
 
 .intent-tab i {
   font-size: 18px;
@@ -1191,15 +1134,7 @@
   box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
 }
 
-.intent-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-}
+
 
 /* Quantity Control Buttons */
 .intent-quantity-control {

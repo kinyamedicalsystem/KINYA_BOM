@@ -23,7 +23,7 @@
   --gray-900: #212529;
   --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   --box-shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
-  --border-radius: 12px;
+  --border-radius: 15px;
   --border-radius-sm: 8px;
   --transition: all 0.3s ease;
 }
@@ -32,12 +32,14 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Nunito", sans-serif;
+  font-weight: 600;
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #0785c4 0%, #02dbb3 100%);
   min-height: 100vh;
+  background: var(--gray-100);
   color: var(--gray-800);
 }
 
@@ -187,7 +189,7 @@ body {
 }
 
 .nav-btn:hover {
-  background: rgba(230, 126, 34, 0.1);
+  background: rgba(2, 243, 231, 0.147);
   color: var(--primary-color);
 }
 
@@ -300,7 +302,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .nav-btn span {
     display: none;
   }

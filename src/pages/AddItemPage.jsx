@@ -13,11 +13,12 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     bom_id: '',
     bom_name: ''
   });
+
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [selectedBomFilter, setSelectedBomFilter] = useState('');
-  const [activeTab, setActiveTab] = useState('form');
+  const [activeTab, setActiveTab] = useState('form');         
   const [newCategory, setNewCategory] = useState('');
   const [showNewCategory, setShowNewCategory] = useState(false);
   
@@ -325,7 +326,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                 Cancel
               </button>
               <button className="add-item-btn add-item-btn-danger" onClick={handleDelete}>
-                <i className="fas fa-trash"></i>
+                <i className="fas fa-trash"></i> 
                 Delete Item
               </button>
             </div>
@@ -375,7 +376,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
           </div>
         </div>
       </div>
-
+      
       <div className="add-item-tabs">
         <button 
           className={`add-item-tab ${activeTab === 'form' ? 'active' : ''}`}
@@ -392,7 +393,6 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
           View All Items ({filteredItems.length})
         </button>
       </div>
-
       {activeTab === 'form' && (
         <div className="add-item-form-container">
           <div className="add-item-form-header">

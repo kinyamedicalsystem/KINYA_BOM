@@ -164,13 +164,13 @@
   color: var(--gray-600);
   font-size: 15px;
 }
-
+/* Generate purchase Intent Btn */
 .add-item-generate-btn {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 40px;
+  border-radius: 15px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -178,14 +178,21 @@
   align-items: center;
   gap: 10px;
   transition: var(--transition);
-  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
 }
 
 .add-item-generate-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+  box-shadow: 0 5px 10px rgba(118, 119, 119, 0.4);
+  
 }
 
+.add-item-generate-btn i {
+  font-size: 18px;
+}
+
+.add-item-generate-btn:active {
+  transform: translateY(0);
+}
 /* Stats Cards */
 .add-item-stats {
   display: grid;
@@ -196,7 +203,7 @@
 
 .add-item-stat-card {
   background: var(--gray-100);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -267,7 +274,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-radius: 40px 40px 0 0;
+  border-radius: 15px;
   transition: var(--transition);
   position: relative;
 }
@@ -290,10 +297,17 @@
   content: '';
   position: absolute;
   bottom: -12px;
-  left: 0;
+  left: 40%;
+  width: 30px;
   right: 0;
   height: 2px;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+}
+
+.add-item-tab.active {
+  color: white;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  box-shadow: 0 4px 10px rgba(87, 87, 86, 0.3);
 }
 
 /* Form Container */
@@ -449,7 +463,7 @@ textarea.add-item-form-input {
 
 .add-item-add-vendor-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+  box-shadow: 0 4px 10px rgba(87, 89, 90, 0.3);
 }
 
 /* Vendor Card */
@@ -1117,64 +1131,3 @@ textarea.add-item-form-input {
   background: var(--gray-300);
 }
 
-/* Tab Buttons */
-.add-item-tab {
-  padding: 12px 24px;
-  border: none;
-  background: transparent;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--gray-600);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 40px;
-  transition: var(--transition);
-  position: relative;
-}
-
-.add-item-tab i {
-  font-size: 18px;
-}
-
-.add-item-tab:hover {
-  color: var(--primary-color);
-  background: rgba(230, 126, 34, 0.05);
-}
-
-.add-item-tab.active {
-  color: white;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
-}
-
-/* Generate Intent Button */
-.add-item-generate-btn {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 40px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: var(--transition);
-  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-
-.add-item-generate-btn i {
-  font-size: 18px;
-}
-
-.add-item-generate-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
-}
-
-.add-item-generate-btn:active {
-  transform: translateY(0);
-}

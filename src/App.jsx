@@ -19,7 +19,7 @@ function App() {
   // Show notification
   const showNotification = useCallback((message, type = 'success') => {
     setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: '', type: '' }), 3000);
+    setTimeout(() => setNotification({ show: false, message: '', type: '' }), 2000);
   }, []);
 
   // Fetch items from Supabase

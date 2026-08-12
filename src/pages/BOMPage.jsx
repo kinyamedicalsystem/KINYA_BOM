@@ -701,7 +701,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                           className="bom-toggle-form-btn"
                           onClick={() => setNewItemForm(prev => ({ ...prev, show: !prev.show }))}
                         >
-                          <i className="fas fa-plus"></i>
+                            {newItemForm.show? <i className="fas fa-circle-xmark"></i>:<i className="fas fa-plus"></i>}
                           {newItemForm.show ? 'Cancel' : 'Create New Item'}
                         </button>
                       </div>
@@ -730,7 +730,6 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                 className="bom-form-input"
                               />
                             </div>
-
                             <div className="bom-form-group full-width">
                               <label><i className="fas fa-align-left"></i>Product Description</label>
                               <textarea
@@ -741,7 +740,6 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                 className="bom-form-input"
                               />
                             </div>
-
                             <div className="bom-form-group">
                               <label><i className="fas fa-folder"></i>Category</label>
                               <div className="bom-category-selector">
@@ -749,7 +747,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                   value={showNewCategory ? 'new' : newItemForm.category}
                                   onChange={(e) => handleCategoryChange(e.target.value)}
                                   className="bom-form-input"
-                                >
+                                 >
                                   <option value="">Select Category</option>
                                   {existingCategories.map(category => (
                                     <option key={category} value={category}>
@@ -765,7 +763,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                     onChange={(e) => setNewCategory(e.target.value)}
                                     placeholder="Enter new category name"
                                     className="bom-form-input bom-new-category-input"
-                                  />
+                                    />
                                 )}
                               </div>
                             </div>
@@ -870,7 +868,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                     </div>
 
                     <div className="bom-available-items">
-                      <div className="bom-section-header">
+                      <div className="bom-section-header"> 
                         <h4><i className="fas fa-search"></i>Add Existing Items to BOM</h4>
                         <div className="bom-search-box small">
                           <i className="fas fa-search"></i>
@@ -982,7 +980,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                           autoFocus
                                         />
                                         <div className="bom-quantity-actions">
-                                          <button className="bom-save-btn small" onClick={saveQuantity}>
+                                            <button className="bom-save-btn small" onClick={saveQuantity}>
                                             <i className="fas fa-check"></i>
                                           </button>
                                           <button className="bom-cancel-btn small" onClick={cancelEditingQuantity}>
@@ -995,6 +993,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                         className="bom-quantity-display"
                                         onClick={() => startEditingQuantity(bom.id, item.id, item.quantity)}
                                       >
+                                
                                         <span>{item.quantity}</span>
                                         <i className="fas fa-edit"></i>
                                       </div>
