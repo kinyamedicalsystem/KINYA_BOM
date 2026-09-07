@@ -40,6 +40,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
     [vendors]
   );
 
+  //Fetch Available Intent for PO it from Intent Database
   const fetchAvailableIntents = async () => {
     try {
       const { data, error } = await supabase
@@ -70,13 +71,13 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
     }
   };
 
+  
   const groupIntentItemsByVendor = (intentItems) => {
     if (!intentItems || !Array.isArray(intentItems)) {
       return [];
     }
-    
+   
     const vendorsMap = {};
-    
     intentItems.forEach(item => {
       const vendorName = item.vendorName || item.vendor_name || 'Unknown Vendor';
       if (!vendorsMap[vendorName]) {
@@ -102,7 +103,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
         vendorName: vendorName,
         totalCost: (cost * quantity).toFixed(2)
       };
-      
+        
       vendorsMap[vendorName].items.push(itemData);
       vendorsMap[vendorName].totalCost += cost * quantity;
       vendorsMap[vendorName].totalQuantity += quantity;
@@ -251,7 +252,6 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
       showNotification  ('Please add at least one item to the purchase order','error');
       return;
     }
-
     setIsSaving(true);
 
     const poNumber = generatePONumber();
@@ -591,113 +591,6 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
     printWindow.print();
   };
 
-  const generatePOPDF = (poData, type = 'whatsapp') => {
-    if (!poData) return;
-    
-    const printWindow = window.open('', '_blank');
-    const pdfContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Purchase Order - ${poData.po_number}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .company-info { margin-bottom: 20px; }
-          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; }
-          .totals { float: right; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>PURCHASE ORDER</h1>
-          <h2>${poData.po_number}</h2>
-        </div>
-        <div class="company-info">
-          <p><strong>Vendor:</strong> ${poData.vendor_name}</p>
-          <p><strong>PO Date:</strong> ${poData.po_date ? new Date(poData.po_date).toLocaleDateString() : 'N/A'}</p>
-          <p><strong>Delivery Date:</strong> ${poData.delivery_date ? new Date(poData.delivery_date).toLocaleDateString() : 'Not specified'}</p>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>SKU</th>
-              <th>Description</th>
-              <th>Quantity</th>
-              <th>Unit Price</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${(poData.items || []).map(item => `
-              <tr>
-                <td>${item.sku}</td>
-                <td>${item.productDescription}</td>
-                <td>${item.quantity}</td>
-                <td>₹${(parseFloat(item.unitCost || 0)).toFixed(2)}</td>
-                <td>₹${(parseFloat(item.totalCost || 0)).toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="totals">
-          <p><strong>Subtotal: ₹${(parseFloat(poData.subtotal || 0)).toFixed(2)}</strong></p>
-          <p><strong>Tax: ₹${(parseFloat(poData.tax_amount || 0)).toFixed(2)}</strong></p>
-          <p><strong>Total: ₹${(parseFloat(poData.total_amount || 0)).toFixed(2)}</strong></p>
-        </div>
-      </body>
-      </html>
-    `;
-    
-    printWindow.document.write(pdfContent);
-    printWindow.document.close();
-    
-    if (type === 'whatsapp') {
-      const message = `Purchase Order ${poData.po_number}\nVendor: ${poData.vendor_name}\nTotal: ₹${(parseFloat(poData.total_amount || 0)).toFixed(2)}`;
-      const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
-    }
-    
-    printWindow.print();
-  };
-
-  const handleShareWhatsApp = () => {
-    if (!poData) return;
-    generatePOPDF(poData, 'whatsapp');
-  };
-
-  const handleShareEmail = () => {
-    if (!poData) return;
-    const subject = `Purchase Order ${poData.po_number} - KINYA MEDICAL SYSTEM`;
-    const body = `Please find the purchase order attached.\n\nPO Number: ${poData.po_number}\nVendor: ${poData.vendor_name}\nTotal Amount: ₹${(parseFloat(poData.total_amount || 0)).toFixed(2)}`;
-    
-    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-  };
-
-  const handleCopyToClipboard = () => {
-    if (!poData) return;
-    
-    const text = `Purchase Order: ${poData.po_number}\n\n` +
-      `Vendor: ${poData.vendor_name}\n` +
-      `Date: ${poData.po_date ? new Date(poData.po_date).toLocaleDateString() : 'N/A'}\n` +
-      `Status: ${poData.status}\n\n` +
-      `Items:\n` +
-      (poData.items || []).map((item, index) => 
-        `${index + 1}. ${item.sku} | ${item.itemCode} | ${item.productDescription} | ₹${(parseFloat(item.unitCost || 0)).toFixed(2)} x ${item.quantity} = ₹${(parseFloat(item.totalCost || 0)).toFixed(2)}`
-      ).join('\n') +
-      `\n\nSubtotal: ₹${(parseFloat(poData.subtotal || 0)).toFixed(2)}\n` +
-      `Tax: ₹${(parseFloat(poData.tax_amount || 0)).toFixed(2)}\n` +
-      `Total: ₹${(parseFloat(poData.total_amount || 0)).toFixed(2)}`;
-    
-    navigator.clipboard.writeText(text).then(() => {
-      showNotification('Purchase order copied to clipboard!', 'success');
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
-      showNotification('Failed to copy to clipboard','error');
-    });
-  };
 
   useEffect(() => {
     fetchPurchaseOrders();
@@ -768,7 +661,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
           onClick={() => setActiveTab('create')}
         >
           <i className="fas fa-plus-circle"></i>
-          Create New PO
+           Create New PO
         </button>
         <button 
           className={`po-tab ${activeTab === 'intents' ? 'active' : ''}`}
@@ -1193,17 +1086,9 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
                 <i className="fas fa-print"></i>
                 Print PO
               </button>
-              <button className="po-whatsapp-btn" onClick={handleShareWhatsApp}>
-                <i className="fab fa-whatsapp"></i>
-                Share via WhatsApp
-              </button>
-              <button className="po-email-btn" onClick={handleShareEmail}>
-                <i className="fas fa-envelope"></i>
-                Share via Email
-              </button>
-              <button className="po-copy-btn" onClick={handleCopyToClipboard}>
-                <i className="fas fa-copy"></i>
-                Copy to Clipboard
+              <button className="po-download-btn">
+                <i className="fas fa-download"></i>
+                Download PO
               </button>
               <button className="po-back-btn" onClick={() => setActiveTab('history')}>
                 <i className="fas fa-arrow-left"></i>

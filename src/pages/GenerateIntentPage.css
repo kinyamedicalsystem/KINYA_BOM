@@ -732,8 +732,7 @@
 
 .intent-preview-header {
   padding: 20px;
-  border-radius: 20px 20px 0 0;
-  background: rgba(180, 179, 179, 0.175);
+  background: rgba(184, 182, 182, 0.067);
   border-bottom: 1px solid var(--gray-200);
   display: flex;
   justify-content: space-between;
@@ -761,9 +760,7 @@
 }
 
 .intent-print-btn,
-.intent-whatsapp-btn,
-.intent-email-btn,
-.intent-copy-btn,
+.intent-download-btn,
 .intent-back-btn,
 .intent-po-btn {
   padding: 8px 16px;
@@ -784,20 +781,8 @@
   border: none;
 }
 
-.intent-whatsapp-btn {
-  background: linear-gradient(135deg, #25d366, #128C7E);
-  color: white;
-  border: none;
-}
-
-.intent-email-btn {
+.intent-download-btn {
   background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-  border: none;
-}
-
-.intent-copy-btn {
-  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
   color: white;
   border: none;
 }
@@ -815,9 +800,7 @@
 }
 
 .intent-print-btn:hover,
-.intent-whatsapp-btn:hover,
-.intent-email-btn:hover,
-.intent-copy-btn:hover,
+.intent-download-btn:hover,
 .intent-po-btn:hover,
 .intent-back-btn:hover {
   transform: translateY(-2px);
@@ -1266,82 +1249,6 @@
 .intent-generate-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Preview Action Buttons */
-.intent-preview-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.intent-print-btn,
-.intent-whatsapp-btn,
-.intent-email-btn,
-.intent-copy-btn,
-.intent-po-btn,
-.intent-back-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 40px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.intent-print-btn {
-  background: linear-gradient(135deg, #34495e, #2c3e50);
-  color: white;
-}
-
-.intent-whatsapp-btn {
-  background: linear-gradient(135deg, #25d366, #128C7E);
-  color: white;
-}
-
-.intent-email-btn {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-}
-
-.intent-copy-btn {
-  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-  color: white;
-}
-
-.intent-po-btn {
-  background: linear-gradient(135deg, #e67e22, #d35400);
-  color: white;
-}
-
-.intent-back-btn {
-  background: linear-gradient(135deg, #9b59b6, #8e44ad);
-  color: white;
-}
-
-.intent-print-btn:hover,
-.intent-whatsapp-btn:hover,
-.intent-email-btn:hover,
-.intent-copy-btn:hover,
-.intent-po-btn:hover,
-.intent-back-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-.intent-print-btn:active,
-.intent-whatsapp-btn:active,
-.intent-email-btn:active,
-.intent-copy-btn:active,
-.intent-po-btn:active,
-.intent-back-btn:active {
-  transform: translateY(0);
 }
 
 /* Select All Button */

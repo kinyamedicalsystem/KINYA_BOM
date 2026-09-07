@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect,useRef } from 'react';
 import { supabase } from '../supabase';
+import html2pdf from 'html2pdf.js';
 import "./GenerateIntentPage.css"
 
-const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotification }) => {
+const GenerateIntentPage = ({ items, boms , onGeneratePO, showNotification }) => {
   const [selectedType, setSelectedType] = useState('individual');
   const [selectedIndividualItems, setSelectedIndividualItems] = useState([]);
   const [selectedBomItems, setSelectedBomItems] = useState([]);
@@ -17,6 +18,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
    const [showDeletePopup, setshowDeletePopup] = useState(false);
   const [deleteIntentid, setDeleteIntentid] = useState(null);
+  const pdfRef=useRef(null)
 
   const filteredIndividualItems = useMemo(() =>
     items.filter(item =>
@@ -359,9 +361,45 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
     );
   }
 };
-///Delete Each Data in History///
 
-  const generatePDFForSharing = async (intentData, type = 'whatsapp') => {
+
+const downloadPdf = async () => {
+  if (!intentData) return;
+
+  const element=pdfRef.current
+
+  const options = {
+    margin: 10,
+    filename: `${intentData.intentNumber}.pdf`,
+    image: {
+      type: 'jpeg',
+      quality: 0.98
+    },
+    html2canvas: {
+      scale: 2,
+      useCORS: true
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'landscape'
+    }
+  };
+
+  try {
+    await html2pdf()
+      .set(options)
+      .from(element)
+      .save();
+
+    showNotification('PDF downloaded successfully!', 'success');
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    showNotification('Failed to download PDF', 'error');
+  }
+};
+
+  const generatePDF = async () => {
     const printWindow = window.open('', '_blank');
     const pdfContent = `
       <!DOCTYPE html>
@@ -506,48 +544,12 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
     printWindow.document.write(pdfContent);
     printWindow.document.close();
 
-    if (type === 'whatsapp') {
-      const message = `Purchase Intent ${intentData.intentNumber}\nTotal: ₹${intentData.totalCost.toFixed(2)}`;
-      const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
-    }
-
     printWindow.print();
   };
 
-  const handleShareWhatsApp = () => {
-    generatePDFForSharing(intentData, 'whatsapp');
-  };
-
-  const handleShareEmail = () => {
-    const subject = `Purchase Intent ${intentData.intentNumber} - KINYA MEDICAL SYSTEM`;
-    const body = `Please find the purchase intent attached.\n\nIntent Number: ${intentData.intentNumber}\nTotal Amount: ₹${intentData.totalCost.toFixed(2)}`;
-
-    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-  };
-
-  const handleCopyToClipboard = () => {
-    const text = `Purchase Intent - KINYA MEDICAL SYSTEM\n\n` +
-      `Intent Number: ${intentData.intentNumber}\n` +
-      `Generated: ${new Date(intentData.generatedAt).toLocaleString()}\n` +
-      `Total Items: ${intentData.totalItems}\n` +
-      `Total Quantity: ${intentData.totalQuantity}\n` +
-      `Total Cost: ₹${intentData.totalCost.toFixed(2)}\n\n` +
-      `Items:\n` +
-      intentData.items.map((item, index) =>
-        `${index + 1}. SKU: ${item.sku} | Code: ${item.itemCode || item.item_code} | ${item.productDescription || item.product_description} | Category: ${item.category} | Vendor: ${item.vendorName} | Cost: ₹${item.cost} | Qty: ${item.quantity} | Link: ${item.orderLink || item.order_link || 'N/A'}`
-      ).join('\n');
-
-    navigator.clipboard.writeText(text).then(() => {
-      showNotification('Purchase intent copied to clipboard!', 'success');
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
-      showNotification('Failed to copy to clipboard', 'error');
-    });
-  };
 
   const handlePrint = () => {
-    generatePDFForSharing(intentData, 'print');
+    generatePDF();
   };
 
   const handlePreviewIntent = (intent) => {
@@ -1232,7 +1234,7 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
         </>
       )}
 
-      {intentData && (
+      {(intentData && activeTab === 'create') && (
         <div className="intent-preview">
           <div className="intent-preview-header">
             <h3><i className="fas fa-file-invoice"></i>Purchase Intent Preview - {intentData.intentNumber}</h3>
@@ -1241,17 +1243,10 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                 <i className="fas fa-print"></i>
                 Print Intent
               </button>
-              <button className="intent-whatsapp-btn" onClick={handleShareWhatsApp}>
-                <i className="fab fa-whatsapp"></i>
-                Share via WhatsApp
-              </button>
-              <button className="intent-email-btn" onClick={handleShareEmail}>
-                <i className="fas fa-envelope"></i>
-                Share via Email
-              </button>
-              <button className="intent-copy-btn" onClick={handleCopyToClipboard}>
-                <i className="fas fa-copy"></i>
-                Copy to Clipboard
+    
+              <button className="intent-download-btn">
+                <i className="fas fa-download" onClick={downloadPdf}></i>
+                Download
               </button>
               <button className="intent-back-btn" onClick={() => setIntentData(null)}>
                 <i className="fas fa-arrow-left"></i>
@@ -1261,14 +1256,10 @@ const GenerateIntentPage = ({ items, boms, onBack, onGeneratePO, showNotificatio
                 <i className="fas fa-shopping-cart"></i>
                 Create Purchase Order
               </button>
-              <button className="intent-back-btn" onClick={onBack}>
-                <i className="fas fa-home"></i>
-                Back to Main
-              </button>
             </div>
           </div>
 
-          <div className="intent-content">
+          <div className="intent-content"  ref={pdfRef}>
             <div className="intent-company-header">
               <h1>KINYA MEDICAL SYSTEM</h1>
               <h2>Purchase Department</h2>

@@ -13,12 +13,12 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
   const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
-//Popups
+  //Popups
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [vendorToDelete, setVendorToDelete] = useState(null);
-//Popups
+ //Popups
   const [pendingStatus, setPendingStatus] = useState('');
 
   const vendorStats = useMemo(() => ({  
@@ -42,6 +42,8 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
     });
   }, [vendors, searchTerm, statusFilter]);
 
+
+  //Handle to save the vendors
   const handleSave = async () => {
     if (isSaving) return;
     
@@ -88,7 +90,8 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
       setIsSaving(false);
     }
   };
-
+  
+  //handle edit the vendors
   const handleEdit = useCallback((vendor) => {
     setFormData({
       vendor_name: vendor.vendor_name,
@@ -98,6 +101,8 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
     setEditingId(vendor.id);
   }, []);
 
+  
+  //Handle to delete the vendors
   const handleDelete = async () => {
       try {
         const { error } = await supabase
@@ -117,13 +122,15 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
       }
     
   };
-
+  
+  //whenever you change the status popup appear
   const showStatusChangePopup = (vendor, newStatus) => {
     setSelectedVendor(vendor);
     setPendingStatus(newStatus);
     setShowStatusPopup(true);
   };
 
+  //Handle to Change the status
   const handleStatusChangeConfirmed = async () => {
     if (!selectedVendor) return;
 
@@ -240,8 +247,7 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
             </div>
           </div>
         </div>    
-  
-)}
+   )}
 
       <div className="vendor-header">
         <div className="vendor-title-section">

@@ -9,7 +9,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     product_description: '',
     category: '',
     order_link: '',
-    vendors: [{ name: '', cost: '', primary: true }],
+    vendors: [{ name: '', cost: '', partCode: '', primary: true }],
     bom_id: '',
     bom_name: ''
   });
@@ -18,16 +18,18 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
   const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [selectedBomFilter, setSelectedBomFilter] = useState('');
-  const [activeTab, setActiveTab] = useState('form');         
+  const [activeTab, setActiveTab] = useState('form');
   const [newCategory, setNewCategory] = useState('');
   const [showNewCategory, setShowNewCategory] = useState(false);
-  
+
   // Popup states
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [vendorDropdown, setVendorDropdown] = useState(null);
+
 
   // Get unique categories from existing items
   const existingCategories = [...new Set(items.map(item => item.category).filter(Boolean))];
@@ -52,13 +54,16 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     }
   };
 
+///*******************************  VENDOR MANAGEMENT  *******************************************///
+//---Handle New Vendor--
   const handleAddVendor = () => {
     setFormData(prev => ({
       ...prev,
-      vendors: [...prev.vendors, { name: '', cost: '', primary: false }]
+      vendors: [...prev.vendors, { name: '', cost: '', partCode: '', primary: false }]
     }));
   };
 
+//---Handle Vendor Change--
   const handleVendorChange = (index, field, value) => {
     const updatedVendors = formData.vendors.map((vendor, i) =>
       i === index ? { ...vendor, [field]: value } : vendor
@@ -66,6 +71,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     setFormData(prev => ({ ...prev, vendors: updatedVendors }));
   };
 
+//---Select the vendor it has been approved through the dropdown--
   const handleVendorSelection = (index, vendorName) => {
     const selectedVendor = vendors.find(v => v.vendor_name === vendorName);
     if (selectedVendor) {
@@ -76,6 +82,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     }
   };
 
+//---Set Primary Vendor--
   const setPrimaryVendor = (index) => {
     const updatedVendors = formData.vendors.map((vendor, i) => ({
       ...vendor,
@@ -84,6 +91,69 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     setFormData(prev => ({ ...prev, vendors: updatedVendors }));
   };
 
+//---Set Primary inside the dropdown--
+  const makeVendorPrimary = async (item, selectedVendor) => {
+    try {
+      // Parse existing vendors
+      let vendors = [];
+
+      try {
+        vendors = item.vendors ? JSON.parse(item.vendors) : [];
+      } catch (error) {
+        console.error("Error parsing vendors:", error);
+        return;
+      }
+
+      // Change primary status
+      const updatedVendors = vendors.map(vendor => ({
+        ...vendor,
+        primary: vendor.name === selectedVendor.name
+      }));
+
+      // Update Supabase
+      const { error } = await supabase
+        .from('items')
+        .update({
+          vendors: JSON.stringify(updatedVendors),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      // Refresh items
+      await fetchItems();
+
+      // Close dropdown
+      setVendorDropdown(null);
+
+      showPopup('success', `${selectedVendor.name} is now the primary vendor`);
+
+    } catch (error) {
+      console.error("Error changing primary vendor:", error);
+      showPopup('error', 'Failed to change primary vendor');
+    }
+  };
+
+//---Calculate total primary vendorr cost--
+  const getPrimaryVendorCost = (item) => {
+  try {
+    const itemVendors = item.vendors
+      ? JSON.parse(item.vendors)
+      : [];
+
+    const primaryVendor =
+      itemVendors.find(vendor => vendor.primary) || itemVendors[0];
+
+    return Math.round(Number(primaryVendor?.cost) || 0);
+ 
+  } catch (error) {
+    console.error("Error calculating vendor cost:", error);
+    return 0;
+  }
+};
+
+//---Remove Vendors---
   const removeVendor = (index) => {
     if (formData.vendors.length <= 1) return;
     const updatedVendors = formData.vendors.filter((_, i) => i !== index);
@@ -93,6 +163,8 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     setFormData(prev => ({ ...prev, vendors: updatedVendors }));
   };
 
+  ///*******************************  BOM MANAGEMENT  *******************************************/// 
+  //Handle BOM change through the dropdown
   const handleBOMChange = (bomId) => {
     const selectedBOM = boms.find(bom => bom.id === bomId);
     setFormData(prev => ({
@@ -102,6 +174,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     }));
   };
 
+  ///******************************* CATEGORY MANAGEMENT *******************************************///  
   const handleCategoryChange = (value) => {
     if (value === 'new') {
       setShowNewCategory(true);
@@ -112,9 +185,11 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     }
   };
 
+  ///******************************* CRUD OPERATIONS(Add,Edit,Delete)*******************************************/// 
+  //1.Save items in Database
   const handleSave = async () => {
     if (isSaving) return;
-    
+
     if (!formData.sku || !formData.item_code) {
       showPopup('error', 'SKU and Item Code are required');
       return;
@@ -132,7 +207,6 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
       showPopup('error', 'SKU must be unique');
       return;
     }
-
     setIsSaving(true);
 
     const vendorsJSON = JSON.stringify(formData.vendors);
@@ -152,7 +226,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
 
     try {
       let error;
-      
+
       if (editingId) {
         // Update existing item
         const { error: updateError } = await supabase
@@ -181,15 +255,17 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     }
   };
 
+
+  //2.Edit items and update into the Database
   const handleEdit = (item) => {
     let vendors = [];
     try {
-      vendors = item.vendors ? JSON.parse(item.vendors) : [{ name: '', cost: '', primary: true }];
+      vendors = item.vendors ? JSON.parse(item.vendors) : [{ name: '', cost: '', partCode: '', primary: true }];
     } catch (error) {
       console.error('Error parsing vendors:', error);
-      vendors = [{ name: '', cost: '', primary: true }];
+      vendors = [{ name: '', cost: '', partCode: '', primary: true }];
     }
-    
+
     setFormData({
       sku: item.sku || '',
       item_code: item.item_code || '',
@@ -206,11 +282,14 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     setNewCategory('');
   };
 
+
+  //Delete Confirmation
   const confirmDelete = (item) => {
     setItemToDelete(item);
     setShowDeletePopup(true);
   };
 
+  //3.Delete thh items from the database
   const handleDelete = async () => {
     if (!itemToDelete) return;
 
@@ -238,6 +317,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     setItemToDelete(null);
   };
 
+  //Reset Form
   const resetForm = () => {
     setFormData({
       sku: '',
@@ -245,7 +325,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
       product_description: '',
       category: '',
       order_link: '',
-      vendors: [{ name: '', cost: '', primary: true }],
+      vendors: [{ name: '', cost: '', partCode: '', primary: true }],
       bom_id: '',
       bom_name: ''
     });
@@ -254,21 +334,34 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
     setNewCategory('');
   };
 
+  //Filter items based in item_code,product_description
   const filteredItems = items.filter(item => {
     const matchesSearch = item.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.item_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.product_description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesBomFilter = selectedBomFilter ? item.bom_id === selectedBomFilter : true;
-    
+
     return matchesSearch && matchesBomFilter;
   });
 
   const individualItems = filteredItems.filter(item => !item.bom_id);
-  const bomGroups = boms.map(bom => ({
-    bom,
-    items: filteredItems.filter(item => item.bom_id === bom.id)
-  })).filter(group => group.items.length > 0);
+  const individualTotalCost = individualItems.reduce((total, item) => total + getPrimaryVendorCost(item), 0);
+
+  const bomGroups = boms.map(bom => {
+    const bomItems=filteredItems.filter(item => item.bom_id === bom.id)
+    const totalCost=bomItems.reduce((total,item)=>total+getPrimaryVendorCost(item),0)
+
+    return{
+      bom,
+      items:bomItems,
+      totalCost
+    };
+
+  }).filter(group => group.items.length > 0);
+
+  console.log(bomGroups)
+
 
   const approvedVendors = vendors.filter(vendor => vendor.status === 'Approved');
 
@@ -291,6 +384,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
           </div>
         </div>
       )}
+
 
       {showErrorPopup && (
         <div className="add-item-popup-overlay">
@@ -326,7 +420,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                 Cancel
               </button>
               <button className="add-item-btn add-item-btn-danger" onClick={handleDelete}>
-                <i className="fas fa-trash"></i> 
+                <i className="fas fa-trash"></i>
                 Delete Item
               </button>
             </div>
@@ -376,16 +470,16 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
           </div>
         </div>
       </div>
-      
+
       <div className="add-item-tabs">
-        <button 
+        <button
           className={`add-item-tab ${activeTab === 'form' ? 'active' : ''}`}
           onClick={() => setActiveTab('form')}
         >
           <i className="fas fa-edit"></i>
           {editingId ? 'Edit Item' : 'Add New Item'}
         </button>
-        <button 
+        <button
           className={`add-item-tab ${activeTab === 'list' ? 'active' : ''}`}
           onClick={() => setActiveTab('list')}
         >
@@ -407,7 +501,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
               </button>
             )}
           </div>
-          
+
           <div className="add-item-form-grid">
             <div className="add-item-form-group">
               <label><i className="fas fa-barcode"></i>SKU *</label>
@@ -506,7 +600,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                 Add Vendor
               </button>
             </div>
-            
+
             {formData.vendors.map((vendor, index) => (
               <div key={index} className="add-item-vendor-card">
                 <div className="add-item-vendor-inputs">
@@ -534,6 +628,14 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                     placeholder="Vendor Company Name"
                     value={vendor.name}
                     onChange={(e) => handleVendorChange(index, 'name', e.target.value)}
+                    className="add-item-form-input"
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Vendor item Code"
+                    value={vendor.partCode}
+                    onChange={(e) => handleVendorChange(index, 'partCode', e.target.value)}
                     className="add-item-form-input"
                   />
                   <input
@@ -572,8 +674,8 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
           </div>
 
           <div className="add-item-form-actions">
-            <button 
-              className={`add-item-save-btn ${isSaving ? 'loading' : ''}`} 
+            <button
+              className={`add-item-save-btn ${isSaving ? 'loading' : ''}`}
               onClick={handleSave}
               disabled={isSaving}
             >
@@ -618,6 +720,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
             <div className="add-item-items-section">
               <div className="add-item-section-header">
                 <h4><i className="fas fa-cube"></i>Individual Items ({individualItems.length})</h4>
+                <h4 className='add-item-totalcost'>TotalCost : ₹ {individualTotalCost}</h4>
               </div>
               <div className="add-item-table-container">
                 <table className="add-item-data-table">
@@ -637,10 +740,13 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                       let vendors = [];
                       try {
                         vendors = item.vendors ? JSON.parse(item.vendors) : [];
+
                       } catch (error) {
                         console.error('Error parsing vendors:', error);
                       }
                       const primaryVendor = vendors.find(v => v.primary) || vendors[0];
+                      const secondaryVendor = vendors.filter(v => !v.primary);
+                      console.log(secondaryVendor)
                       return (
                         <tr key={item.id}>
                           <td><strong>{item.sku}</strong></td>
@@ -650,10 +756,30 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                           <td>
                             {primaryVendor ? (
                               <div className="add-item-vendor-info">
-                                <span className="add-item-vendor-name">{primaryVendor.name}</span>
-                                <span className="add-item-vendor-cost"> ₹{primaryVendor.cost}</span>
+                                <div className="add-item-vendor-details">
+                                  <span className="add-item-vendor-name">{primaryVendor.name}</span>
+                                  <span className="add-item-vendor-code">{primaryVendor.partCode}</span>
+                                  <span className="add-item-vendor-cost"> ₹{primaryVendor.cost}</span>
+                                </div>
+                                <div>
+                                  {secondaryVendor.length > 0 ? (
+                                    <button className="add-item-btn-icon change" onClick={() => setVendorDropdown(vendorDropdown === item.id ? null : item.id)}><i className="fa-solid fa-caret-down"></i></button>) : ""}
+                                </div>
                               </div>
                             ) : 'No vendor'}
+                            {vendorDropdown === item.id && secondaryVendor.length > 0 && (
+                              <div className='additem-vendor-dropdown'>
+                                {secondaryVendor.map(vendor => (
+                                  <div className="vendor-dropdown" onClick={() => makeVendorPrimary(item, vendor)}>
+                                    <div className="vendor-dropdown-list">
+                                      <span className="vendor-dropdown-name">{vendor.name}</span>
+                                      <span className="vendor-dropdown-code">{vendor.partCode}</span>
+                                    </div>
+                                    <span className="vendor-dropdown-cost"> ₹{vendor.cost}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </td>
                           <td><span className="add-item-bom-tag individual">Individual</span></td>
                           <td>
@@ -675,10 +801,11 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
             </div>
           )}
 
-          {bomGroups.map(({ bom, items: bomItems }) => (
+          {bomGroups.map(({ bom, items: bomItems,totalCost }) => (
             <div key={bom.id} className="add-item-items-section">
               <div className="add-item-section-header">
-                <h4><i className="fas fa-sitemap"></i>{bom.bom_name} Items ({bomItems.length})</h4>
+                <h4><i className="fas fa-sitemap"></i>{bom.bom_name} Items ({bomItems.length}) </h4>
+                <h4 className='add-item-totalcost'>TotalCost : ₹ {totalCost} </h4>
               </div>
               <div className="add-item-table-container">
                 <table className="add-item-data-table">
@@ -702,6 +829,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                         console.error('Error parsing vendors:', error);
                       }
                       const primaryVendor = vendors.find(v => v.primary) || vendors[0];
+                      const secondaryVendor = vendors.filter(v => !v.primary);
                       return (
                         <tr key={item.id}>
                           <td><strong>{item.sku}</strong></td>
@@ -711,10 +839,31 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                           <td>
                             {primaryVendor ? (
                               <div className="add-item-vendor-info">
-                                <span className="add-item-vendor-name">{primaryVendor.name}</span>
-                                <span className="add-item-vendor-cost"> ₹{primaryVendor.cost}</span>
+                                <div className="add-item-vendor-details">
+                                  <span className="add-item-vendor-name">{primaryVendor.name}</span>
+                                  <span className="add-item-vendor-code">{primaryVendor.partCode}</span>
+                                  <span className="add-item-vendor-cost"> ₹{primaryVendor.cost}</span>
+                                </div>
+                                <div>
+                                  {secondaryVendor.length > 0 ? (
+                                    <button className="add-item-btn-icon change" onClick={() => setVendorDropdown(vendorDropdown === item.id ? null : item.id)}><i className="fa-solid fa-caret-down"></i></button>) : ''}
+                                </div>
                               </div>
                             ) : 'No vendor'}
+                            {vendorDropdown === item.id && secondaryVendor.length > 0 && (
+                              <div className='additem-vendor-dropdown'>
+                                {secondaryVendor.map(vendor => (
+                                  <div className="vendor-dropdown" onClick={() => makeVendorPrimary(item, vendor)}>
+                                    <div className="vendor-dropdown-list" >
+                                      <span className="vendor-dropdown-name">{vendor.name}</span>
+                                      <span className="vendor-dropdown-code">{vendor.partCode}</span>
+                                    </div>
+                                    <span className="vendor-dropdown-cost"> ₹{vendor.cost}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
                           </td>
                           <td><span className="add-item-bom-tag">{item.bom_name}</span></td>
                           <td>

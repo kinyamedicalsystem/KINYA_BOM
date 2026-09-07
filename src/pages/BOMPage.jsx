@@ -15,7 +15,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     product_description: '',
     category: '',
     order_link: '',
-    vendors: [{ name: '', cost: '', primary: true }]
+    vendors: [{ name: '', cost: '',partCode: '' ,primary: true }]
   });
   const [bomItemSearch, setBomItemSearch] = useState('');
   const [bomItemsSearch, setBomItemsSearch] = useState('');
@@ -52,6 +52,8 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     setExpandedBomId(prevId => prevId === bomId ? null : bomId);
   };
 
+
+//-----------------Create the BOMS then store into the database------------------------//
   const handleCreateBOM = async () => {
     if (isSaving) return;
     
@@ -86,27 +88,9 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
       setIsSaving(false);
     }
   };
+ 
 
-  const handleCategoryChange = (value) => {
-    if (value === 'new') {
-      setShowNewCategory(true);
-      setNewItemForm(prev => ({ ...prev, category: '' }));
-    } else {
-      setShowNewCategory(false);
-      setNewItemForm(prev => ({ ...prev, category: value }));
-    }
-  };
-
-  const handleVendorSelection = (index, vendorName) => {
-    const selectedVendor = vendors.find(v => v.vendor_name === vendorName);
-    if (selectedVendor) {
-      const updatedVendors = newItemForm.vendors.map((vendor, i) =>
-        i === index ? { ...vendor, name: vendorName } : vendor
-      );
-      setNewItemForm(prev => ({ ...prev, vendors: updatedVendors }));
-    }
-  };
-
+//-------------------Create a New items inside the BOM'S---------------------//
   const handleCreateItemInBOM = async () => {
     if (!newItemForm.sku || !newItemForm.item_code) {
       showPopup('error', 'SKU and Item Code are required');
@@ -171,6 +155,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
         order_link: newItem.order_link,
         vendor: primaryVendor ? primaryVendor.name : '',
         cost: primaryVendor ? primaryVendor.cost : '',
+        partcode: primaryVendor ? primaryVendor.partCode : '',
         quantity: 1
       };
 
@@ -199,7 +184,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
         product_description: '',
         category: '',
         order_link: '',
-        vendors: [{ name: '', cost: '', primary: true }]
+        vendors: [{ name: '', cost: '',partCode: '' ,primary: true }]
       });
       setShowNewCategory(false);
       setNewCategory('');
@@ -212,13 +197,37 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     }
   };
 
+  
+  const handleCategoryChange = (value) => {
+    if (value === 'new') {
+      setShowNewCategory(true);
+      setNewItemForm(prev => ({ ...prev, category: '' }));
+    } else {
+      setShowNewCategory(false);
+      setNewItemForm(prev => ({ ...prev, category: value }));
+    }
+  };
+
+  //Select the approved vendor through the dropdown
+  const handleVendorSelection = (index, vendorName) => {
+    const selectedVendor = vendors.find(v => v.vendor_name === vendorName);
+    if (selectedVendor) {
+      const updatedVendors = newItemForm.vendors.map((vendor, i) =>
+        i === index ? { ...vendor, name: vendorName } : vendor
+      );
+      setNewItemForm(prev => ({ ...prev, vendors: updatedVendors }));
+    }
+  };
+ 
+  //Add more vendors for each person
   const handleAddVendor = () => {
     setNewItemForm(prev => ({
       ...prev,
-      vendors: [...prev.vendors, { name: '', cost: '', primary: false }]
+      vendors: [...prev.vendors, { name: '', cost: '',partCode: '', primary: false }]
     }));
   };
-
+  
+  //Vendor fields data change
   const handleVendorChange = (index, field, value) => {
     const updatedVendors = newItemForm.vendors.map((vendor, i) =>
       i === index ? { ...vendor, [field]: value } : vendor
@@ -226,6 +235,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     setNewItemForm(prev => ({ ...prev, vendors: updatedVendors }));
   };
 
+  //Set primary and Secondary vendor
   const setPrimaryVendor = (index) => {
     const updatedVendors = newItemForm.vendors.map((vendor, i) => ({
       ...vendor,
@@ -234,6 +244,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     setNewItemForm(prev => ({ ...prev, vendors: updatedVendors }));
   };
 
+  //Remove vendors
   const removeVendor = (index) => {
     if (newItemForm.vendors.length <= 1) return;
     const updatedVendors = newItemForm.vendors.filter((_, i) => i !== index);
@@ -243,7 +254,10 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     setNewItemForm(prev => ({ ...prev, vendors: updatedVendors }));
   };
 
-  const handleAddItemToBOM = async (bomId, item) => {
+
+
+//-----------------Add Items inside the BOM'S then it include individual items------------------//
+    const handleAddItemToBOM = async (bomId, item) => {
     const bom = localBoms.find(b => b.id === bomId);
     const existingItem = bom.items.find(i => i.id === item.id);
     if (existingItem) {
@@ -268,6 +282,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
       order_link: item.order_link,
       vendor: primaryVendor ? primaryVendor.name : '',
       cost: primaryVendor ? primaryVendor.cost : '',
+      partcode:primaryVendor ? primaryVendor.partCode:'',
       quantity: 1
     };
 
@@ -306,6 +321,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     }
   };
 
+  
   const startEditingQuantity = (bomId, itemId, currentQuantity) => {
     setEditingQuantity({ bomId, itemId, value: currentQuantity.toString() });
   };
@@ -345,13 +361,22 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
       if (error) throw error;
       
       await fetchBOMs();
-      showPopup('success', 'Quantity updated successfully!');
+      //showPopup('success', 'Quantity updated successfully!');
     } catch (error) {
       console.error('Error updating quantity:', error);
       showPopup('error', 'Error updating quantity. Please check your connection and try again.');
     }
   };
 
+  //Confirm Delete Popup 
+  const handleDeleteBOMItem = async (bomId, itemId) => {
+    showPopup('confirm', 
+      'Are you sure you want to remove this item from the BOM?',
+      () => handleRemoveItemFromBOM(bomId, itemId)
+    );
+  };
+
+  //Remove items from the BOM'S it kept in outside
   const handleRemoveItemFromBOM = async (bomId, itemId) => {
     const bom = localBoms.find(b => b.id === bomId);
     const updatedItems = bom.items.filter(item => item.id !== itemId);
@@ -389,9 +414,9 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     }
   };
 
+  //Save bom after add the datas inside the BOM'S
   const handleSaveBOM = async (bom) => {
     if (isSaving) return;
-    
     setIsSaving(true);
     try {
       const { error } = await supabase
@@ -416,6 +441,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     }
   };
 
+  //Delete the entire BOM
   const handleDeleteBOM = async (bomId) => {
     showPopup('confirm', 
       'Are you sure you want to delete this BOM? This will also remove BOM associations from all items.',
@@ -455,6 +481,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
     );
   };
 
+  //Edit the BOM name
   const handleEditBOMName = async (bom, newName) => {
     if (!newName.trim()) {
       showPopup('error', 'BOM name cannot be empty');
@@ -493,14 +520,8 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
       showPopup('error', 'Error updating BOM name. Please check your connection and try again.');
     }
   };
-
-  const handleDeleteBOMItem = async (bomId, itemId) => {
-    showPopup('confirm', 
-      'Are you sure you want to remove this item from the BOM?',
-      () => handleRemoveItemFromBOM(bomId, itemId)
-    );
-  };
-
+  
+  //Filter Boms and Items use some specific fields
   const filteredBoms = localBoms.filter(bom =>
     bom.bom_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -605,7 +626,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
             placeholder="Enter New BOM Name"
             value={bomName}
             onChange={(e) => setBomName(e.target.value)}
-            className="bom-form-input"
+            className="bom-form-input new-bom"
           />
           <button 
             className={`bom-create-btn ${isSaving ? 'loading' : ''}`} 
@@ -648,9 +669,9 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                           setLocalBoms(prev => prev.map(b => b.id === bom.id ? updatedBom : b));
                         }}
                         onBlur={() => handleEditBOMName(bom, bom.bom_name)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleEditBOMName(bom, bom.bom_name)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleEditBOMName(bom, bom.bom_name)}
                         autoFocus
-                        className="bom-form-input"
+                        className="bom-form-input "
                       />
                     ) : (
                       <h3 onDoubleClick={() => setEditingBom(bom.id)}>
@@ -818,6 +839,13 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                     onChange={(e) => handleVendorChange(index, 'name', e.target.value)}
                                     className="bom-form-input"
                                   />
+                                   <input
+                                    type="text"
+                                    placeholder="Vendor Item Code"
+                                    value={vendor.partCode}
+                                    onChange={(e) => handleVendorChange(index, 'partCode', e.target.value)}
+                                    className="bom-form-input"
+                                  />
                                   <input
                                     type="number"
                                     placeholder="Item Cost"
@@ -897,7 +925,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                 <div className="bom-item-info">
                                   <div className="bom-item-header">
                                     <strong>SKU: {item.sku}</strong>
-                                    <span className="bom-item-code">Code: {item.item_code}</span>
+                                    <span className="bom-item-code">Code: {item.item_code} <p>Vendorcode: {primaryVendor.partCode}</p></span>
                                   </div>
                                   <p className="bom-item-description">{item.product_description}</p>
                                   <div className="bom-item-meta">
@@ -953,6 +981,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                               <th>Product Description</th>
                               <th>Category</th>
                               <th>Vendor</th>
+                              <th>Vendor Partcode</th>
                               <th>Cost</th>
                               <th>Quantity</th>
                               <th>Actions</th>
@@ -967,6 +996,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                   <td className="bom-truncate">{item.product_description}</td>
                                   <td><span className="bom-category-tag">{item.category}</span></td>
                                   <td>{item.vendor}</td>
+                                  <td>{item.partcode}</td>
                                   <td>{formatRupees(item.cost)}</td>
                                   <td>
                                     {editingQuantity.bomId === bom.id && editingQuantity.itemId === item.id ? (

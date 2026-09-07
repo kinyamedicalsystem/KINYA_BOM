@@ -852,9 +852,7 @@ textarea.po-form-input {
 }
 
 .po-print-btn,
-.po-whatsapp-btn,
-.po-email-btn,
-.po-copy-btn,
+.po-download-btn,
 .po-back-btn {
   padding: 8px 16px;
   border: none;
@@ -872,18 +870,8 @@ textarea.po-form-input {
   color: white;
 }
 
-.po-whatsapp-btn {
-  background: linear-gradient(135deg, #25d366, #128C7E);
-  color: white;
-}
-
-.po-email-btn {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-}
-
-.po-copy-btn {
-  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+.po-download-btn {
+  background:linear-gradient(135deg, #3498db, #2980b9);
   color: white;
 }
 
@@ -893,9 +881,7 @@ textarea.po-form-input {
 }
 
 .po-print-btn:hover,
-.po-whatsapp-btn:hover,
-.po-email-btn:hover,
-.po-copy-btn:hover,
+.po-download-btn:hover,
 .po-back-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -1469,73 +1455,7 @@ textarea.po-form-input {
   transform: translateY(-2px) rotate(5deg);
 }
 
-/* Preview Action Buttons */
-.po-preview-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
 
-.po-print-btn,
-.po-whatsapp-btn,
-.po-email-btn,
-.po-copy-btn,
-.po-back-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 40px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.po-print-btn {
-  background: linear-gradient(135deg, #34495e, #2c3e50);
-  color: white;
-}
-
-.po-whatsapp-btn {
-  background: linear-gradient(135deg, #25d366, #128C7E);
-  color: white;
-}
-
-.po-email-btn {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-}
-
-.po-copy-btn {
-  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-  color: white;
-}
-
-.po-back-btn {
-  background: linear-gradient(135deg, #9b59b6, #8e44ad);
-  color: white;
-}
-
-.po-print-btn:hover,
-.po-whatsapp-btn:hover,
-.po-email-btn:hover,
-.po-copy-btn:hover,
-.po-back-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-.po-print-btn:active,
-.po-whatsapp-btn:active,
-.po-email-btn:active,
-.po-copy-btn:active,
-.po-back-btn:active {
-  transform: translateY(0);
-}
 
 /* Popup Action Buttons */
 .po-confirm-actions {

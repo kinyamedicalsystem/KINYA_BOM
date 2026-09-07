@@ -1,26 +1,86 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo,useRef } from 'react';
 import { supabase } from './supabase';
 import AddItemPage from './pages/AddItemPage';
 import BOMPage from './pages/BOMPage';
 import GenerateIntentPage from './pages/GenerateIntentPage';
 import VendorPage from './pages/VendorPage';
 import PurchaseOrderPage from './pages/PurchaseOrderPage';
+import LoginPage from './pages/AUTH/Loginpage'
 import './App.css';
 
 function App() {
+   //Store the users details in LocalStorage for profile
+   const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("inventory_user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [currentPage, setCurrentPage] = useState('add-item');
   const [items, setItems] = useState([]);
   const [boms, setBoms] = useState([]);
   const [vendors, setVendors] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [poIntentData, setPoIntentData] = useState(null);
+
+  //Loading,Notification and profileShow States
+  const [isLoading, setIsLoading] = useState({page:true,logOut:false});
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [logoutnotification,setlogoutNotification]=useState("")
+  const [profileShow,setprofileShow]=useState(false)
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+        if (profileRef.current && !profileRef.current.contains(event.target)) {
+            setprofileShow(false);
+        }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
+}, []);
+
+
+//Login Handling
+const  handleLoginSuccess = (userData) =>{
+   // Save user in localStorage
+    localStorage.setItem(
+      "inventory_user",
+      JSON.stringify(userData)
+    );
+
+    // Update React state
+    setUser(userData);
+    showNotification('Login Successfully','success')
+
+}
+
+//Logout Handling
+const handleLogout = async () => {
+  setIsLoading(prev => ({
+    ...prev,
+    logOut: true
+  }));
+
+  // Small delay so spinner can be seen
+  setTimeout(() => {
+    localStorage.removeItem("inventory_user");
+    setUser(null);
+
+    setIsLoading(prev => ({...prev,logOut: false}));
+    setprofileShow(false)
+    setlogoutNotification('Logout Successfully')
+  }, 1500);
+
+};
 
   // Show notification
   const showNotification = useCallback((message, type = 'success') => {
     setNotification({ show: true, message, type });
     setTimeout(() => setNotification({ show: false, message: '', type: '' }), 2000);
   }, []);
+
 
   // Fetch items from Supabase
   const fetchItems = useCallback(async () => {
@@ -32,6 +92,7 @@ function App() {
 
       if (error) throw error;
       setItems(data || []);
+  
     } catch (error) {
       console.error('Error fetching items:', error);
       setItems([]);
@@ -92,14 +153,17 @@ function App() {
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
-      setIsLoading(true);
+      setIsLoading(prev => (
+        {...prev,page:true}
+        ));
+
       try {
         await Promise.all([fetchItems(), fetchBOMs(), fetchVendors()]);
       } catch (error) {
         console.error('Error loading data:', error);
         showNotification('Error loading data', 'error');
       } finally {
-        setIsLoading(false);
+        setIsLoading(prev=>({...prev,page:false}));
       }
     };
     loadData();
@@ -114,7 +178,7 @@ function App() {
 
   // Memoized page render
   const renderPage = useMemo(() => {
-    if (isLoading) {
+    if (isLoading.page) {
       return (
         <div className="loading-container">
           <div className="loading-spinner">
@@ -124,7 +188,7 @@ function App() {
         </div>
       );
     }
-
+  
     const pageProps = {
       showNotification,
       fetchItems,
@@ -221,6 +285,10 @@ function App() {
     }
   };
 
+  if(!user){
+    return (<LoginPage onLoginSuccess={handleLoginSuccess} logoutNotification={logoutnotification} />)
+  }
+
   return (
     <div className="app">
       {/* Notification System */}
@@ -278,9 +346,26 @@ function App() {
               <span>{vendors.length} Vendors</span>
             </div>
           </div>
+          <div className="profile-section" ref={profileRef}>
+          <button className='profile' onClick={()=>setprofileShow(!profileShow)}>{(user.bom_user).toUpperCase().split('',1)}</button>
+          {profileShow &&(
+          <div className="profile-list">
+            <div className='profile-content'>
+              <h5>{(user.bom_user).toUpperCase()}</h5>
+              <small className='admin'>{(user.bom_role).toUpperCase()}</small>
+              <p>{user.bom_email}</p>
+            </div>
+            {/*<button className='edit-btn'><i class="fa-solid fa-pen"></i> Edit</button>*/}
+            <p className='profile-divider'></p>
+            <button  className='logout-btn' 
+            onClick={handleLogout}>
+            {isLoading.logOut ? (<div className="logoutspinner-ring"></div>):""}
+          <i class="fa-solid fa-right-from-bracket fa-flip-horizontal"></i>Log Out</button>
+          </div>
+          )}
+        </div>
         </div>
       </header>
-      
       <main className="app-main">
         {renderPage}
       </main>
