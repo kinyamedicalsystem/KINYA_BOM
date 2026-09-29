@@ -513,7 +513,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                 className="add-item-form-input"
               />
             </div>
-
+            
             <div className="add-item-form-group">
               <label><i className="fas fa-tag"></i>Item Code *</label>
               <input
@@ -752,7 +752,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                           <td><strong>{item.sku}</strong></td>
                           <td>{item.item_code}</td>
                           <td className="add-item-truncate">{item.product_description}</td>
-                          <td><span className="add-item-category-tag">{item.category}</span></td>
+                          <td>{item.category ? <span className="add-item-category-tag">{item.category}</span>:" "}</td>
                           <td>
                             {primaryVendor ? (
                               <div className="add-item-vendor-info">
@@ -835,7 +835,7 @@ const AddItemPage = ({ items, boms, fetchItems, onGenerateIntent, vendors, showN
                           <td><strong>{item.sku}</strong></td>
                           <td>{item.item_code}</td>
                           <td className="add-item-truncate">{item.product_description}</td>
-                          <td><span className="add-item-category-tag">{item.category}</span></td>
+                          <td>{item.category ? <span className="add-item-category-tag">{item.category}</span>:" "}</td>
                           <td>
                             {primaryVendor ? (
                               <div className="add-item-vendor-info">

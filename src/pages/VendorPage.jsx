@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { supabase } from '../supabase';
 import "./VendorPage.css"
-import { faL } from '@fortawesome/free-solid-svg-icons';
+
 
 const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => {
   const [formData, setFormData] = useState({
@@ -119,8 +119,7 @@ const VendorPage = ({ vendors, setVendors, fetchVendors, showNotification }) => 
       } catch (error) {
         console.error('Error deleting vendor:', error);
         showNotification('Error deleting vendor. Please check your connection and try again.', 'error');
-      }
-    
+      }  
   };
   
   //whenever you change the status popup appear

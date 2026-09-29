@@ -285,7 +285,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
       partcode:primaryVendor ? primaryVendor.partCode:'',
       quantity: 1
     };
-
+  
     const updatedItems = [...bom.items, bomItem];
 
     try {
@@ -925,11 +925,11 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                 <div className="bom-item-info">
                                   <div className="bom-item-header">
                                     <strong>SKU: {item.sku}</strong>
-                                    <span className="bom-item-code">Code: {item.item_code} <p>Vendorcode: {primaryVendor.partCode}</p></span>
+                                    <span className="bom-item-code">Code: {item.item_code} <p>Vendorcode: {primaryVendor?.partCode}</p></span>
                                   </div>
                                   <p className="bom-item-description">{item.product_description}</p>
                                   <div className="bom-item-meta">
-                                    <span className="bom-item-category">{item.category}</span>
+                                    {item.category ? <span className="bom-item-category">{item.category}</span>:" "}
                                     <span className="bom-item-vendor">
                                       <i className="fas fa-truck"></i> {primaryVendor?.name}
                                     </span>
@@ -994,7 +994,7 @@ const BOMPage = ({ boms, setBoms, items, setItems, fetchBOMs, fetchItems, onGene
                                   <td><strong>{item.sku}</strong></td>
                                   <td>{item.item_code}</td>
                                   <td className="bom-truncate">{item.product_description}</td>
-                                  <td><span className="bom-category-tag">{item.category}</span></td>
+                                  <td>{item.category ? <span className="bom-category-tag">{item.category}</span>:" "}</td>
                                   <td>{item.vendor}</td>
                                   <td>{item.partcode}</td>
                                   <td>{formatRupees(item.cost)}</td>

@@ -1,6 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from '../supabase';
+import ReactDOMServer from "react-dom/server"
+import PO from "./component/PurchaseOrder"
+import PdfPrintcss from "./component/PoPrint.css?raw"
 import "./PurchaseOrderPage.css"
+import html2pdf from 'html2pdf.js';
 
 const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotification }) => {
   const [selectedVendor, setSelectedVendor] = useState('');
@@ -62,8 +66,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
           ...intent,
           items: items
         };
-      });
-      
+      }); 
       setAvailableIntents(parsedData);
     } catch (error) {
       console.error('Error fetching intents:', error);
@@ -101,9 +104,10 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
         unitCost: cost,
         quantity: quantity,
         vendorName: vendorName,
+        vendorCode:item.vendorCode || '',
         totalCost: (cost * quantity).toFixed(2)
       };
-        
+     
       vendorsMap[vendorName].items.push(itemData);
       vendorsMap[vendorName].totalCost += cost * quantity;
       vendorsMap[vendorName].totalQuantity += quantity;
@@ -261,12 +265,14 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
       id: item.id,
       sku: item.sku,
       itemCode: item.itemCode,
+      vendorCode:item.vendorCode,
       productDescription: item.productDescription,
       category: item.category,
       quantity: item.quantity,
       unitCost: item.unitCost,
       totalCost: item.totalCost
     }));
+    console.log(itemsData)
 
     const purchaseOrder = {
       po_number: poNumber,
@@ -390,207 +396,112 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
     setActiveTab('preview');
   };
 
-  const handlePrintPO = () => {
-    if (!poData) return;
-    
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Purchase Order - ${poData.po_number}</title>
-        <style>
-          body { 
-            font-family: 'Google', sans-serif; 
-            margin: 20px;
-            color: #333;
-            line-height: 1.4;
-          }
-          .company-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #2527258b;
-            padding-bottom: 20px;
-          }
-          .company-header h1 {
-            color: #0a3bafca;
-            margin: 0;
-            font-size: 28px;
-          }
-          .company-header h2 {
-            color: #555;
-            margin: 5px 0;
-            font-size: 18px;
-          }
-          .po-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-          }
-          .po-info {
-            flex: 1;
-          }
-          .vendor-info {
-            flex: 1;
-            text-align: right;
-          }
-          .po-details {
-            margin-bottom: 20px;
-          }
-          .po-table { 
-            width: 100%; 
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 12px;
-          }
-          .po-table th, .po-table td { 
-            border: 1px solid #ddd; 
-            padding: 10px;
-            text-align: left;
-          }
-          .po-table th { 
-            background-color: #184faedc; 
-            color: white;
-            font-weight: bold;
-          }
-          .po-table tr:nth-child(even) {
-            background-color: #f8f9fa;
-          }
-          .total-row {
-            font-weight: bold;
-            background-color: #e9ecef !important;
-          }
-          .cost-column, .quantity-column {
-            text-align: right;
-          }
-          .totals-section {
-            margin-top: 30px;
-            text-align: right;
-          }
-          .totals-table {
-            width: 300px;
-            margin-left: auto;
-            border-collapse: collapse;
-          }
-          .totals-table td {
-            padding: 8px;
-            border: 1px solid #ddd;
-          }
-          .totals-table tr:last-child {
-            font-weight: bold;
-            background-color: #e9ecef;
-          }
-          .footer {
-            margin-top: 50px;
-            border-top: 2px solid #3c3e3d96;
-            padding-top: 20px;
-          }
-          .footer-section {
-            margin-bottom: 15px;
-          }
-          .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 12px;
-          }
-          .status-draft { background-color: #6c757d; color: white; }
-          .status-sent { background-color: #17a2b8; color: white; }
-          .status-confirmed { background-color: #28a745; color: white; }
-          @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="company-header">
-          <h1>KINYA MEDICAL SYSTEM</h1>
-          <h2>Purchase Department</h2>
-        </div>
-        
-        <div class="po-header">
-          <div class="po-info">
-            <h3>PURCHASE ORDER</h3>
-            <p><strong>PO Number:</strong> ${poData.po_number}</p>
-            <p><strong>PO Date:</strong> ${poData.po_date ? new Date(poData.po_date).toLocaleDateString() : 'N/A'}</p>
-            <p><strong>Status:</strong> <span class="status-badge status-${poData.status?.toLowerCase() || 'draft'}">${poData.status || 'Draft'}</span></p>
-          </div>
-          <div class="vendor-info">
-            <h4>VENDOR</h4>
-            <p><strong>${poData.vendor_name}</strong></p>
-          </div>
-        </div>
 
-        <div class="po-details">
-          <p><strong>Delivery Date:</strong> ${poData.delivery_date ? new Date(poData.delivery_date).toLocaleDateString() : 'Not specified'}</p>
-          <p><strong>Payment Terms:</strong> ${poData.terms || 'Net 30 days'}</p>
-        </div>
 
-        <table class="po-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>SKU</th>
-              <th>Item Code</th>
-              <th>Product Description</th>
-              <th>Category</th>
-              <th>Unit Cost</th>
-              <th>Quantity</th>
-              <th>Total Cost</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${(poData.items || []).map((item, index) => `
-              <tr>
-                <td>${index + 1}</td>
-                <td><strong>${item.sku || 'N/A'}</strong></td>
-                <td>${item.itemCode || 'N/A'}</td>
-                <td>${item.productDescription || 'N/A'}</td>
-                <td>${item.category || 'N/A'}</td>
-                <td class="cost-column">₹${(parseFloat(item.unitCost || 0)).toFixed(2)}</td>
-                <td class="quantity-column">${item.quantity || 0}</td>
-                <td class="cost-column">₹${(parseFloat(item.totalCost || 0)).toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+  const generatePDF = async (Purchaseorder) => {
+      const printContent = ReactDOMServer.renderToString(
+        <PO purchaseOrder={Purchaseorder}/>
+      );
+  
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!doctype html>
+        <html>
+        <head>
+          <title>Purchase Order - ${poData.po_number}</title>
+          <style>
+           ${PdfPrintcss}
+  
+           .print-btn{
+               background: #168cf4;
+               padding: 9px 10px;
+               border: none;
+               border-radius: 5px;
+               color: white;
+           }
+  
+              </style>
+            <body>
+  
+          <button class="print-btn" onclick="window.print()">
+                <i class="fa-solid fa-file-invoice "></i> Print PDF
+          </button>
+  
+          ${printContent}
+  
+        </body>
+        </html>
+      `);
+  
+      printWindow.document.close();
+  
+    };
 
-        <div class="totals-section">
-          <table class="totals-table">
-            <tr>
-              <td>Subtotal:</td>
-              <td>₹${(parseFloat(poData.subtotal || 0)).toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td>Tax (${poData.tax_rate || 0}%):</td>
-              <td>₹${(parseFloat(poData.tax_amount || 0)).toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td>Total Amount:</td>
-              <td>₹${(parseFloat(poData.total_amount || 0)).toFixed(2)}</td>
-            </tr>
-          </table>
-        </div>
 
-        <div class="footer">
-          ${poData.notes ? `
-            <div class="footer-section">
-              <h4>Notes:</h4>
-              <p>${poData.notes}</p>
-            </div>
-          ` : ''}
-          <div class="footer-section">
-            <p><strong>Generated on:</strong> ${poData.created_at ? new Date(poData.created_at).toLocaleString() : 'N/A'}</p>
-          </div>
-        </div>
+    const downloadPDF = async (purchaseOrder) => {
+   try {
+    const printContent = ReactDOMServer.renderToString(
+      <PO purchaseOrder={purchaseOrder} />
+    );
+
+    const container = document.createElement("div");
+    container.innerHTML = `
+    <!doctype html>
+     <html>
+      <style>
+        ${PdfPrintcss}
+      </style>
+    <body>
+      ${printContent}
       </body>
       </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-  };
+    `;
 
+    document.body.appendChild(container);
+
+    const pdfElement = container;
+
+    console.log(pdfElement);
+
+    const options = {
+      margin: 0,
+
+      filename: `${purchaseOrder.po_number || "Purchase-Order"}.pdf`,
+
+      image: {
+        type: "jpeg",
+        quality: 0.98
+      },
+
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff"
+      },
+
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      },
+
+      pagebreak: {
+        mode: ["css", "legacy"]
+      }
+    };
+
+    await html2pdf()
+      .set(options)
+      .from(pdfElement)
+      .save();
+
+    document.body.removeChild(container);
+
+  } catch (error) {
+    console.error("Error downloading PDF:", error);
+    showNotification("Failed to download Purchase Order PDF", "error");
+  }
+};
 
   useEffect(() => {
     fetchPurchaseOrders();
@@ -828,6 +739,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
                     <tr>
                       <th>SKU</th>
                       <th>Item Code</th>
+                       <th>Vendor Code</th>
                       <th>Description</th>
                       <th>Category</th>
                       <th>Unit Cost</th>
@@ -841,6 +753,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
                       <tr key={item.id}>
                         <td><strong>{item.sku}</strong></td>
                         <td>{item.itemCode}</td>
+                        <td>{item.vendorCode}</td>
                         <td>{item.productDescription}</td>
                         <td>{item.category}</td>
                         <td>₹{(parseFloat(item.unitCost || 0)).toFixed(2)}</td>
@@ -1082,11 +995,11 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
           <div className="po-preview-header">
             <h3><i className="fas fa-file-invoice"></i>Purchase Order Preview</h3>
             <div className="po-preview-actions">
-              <button className="po-print-btn" onClick={handlePrintPO}>
+              <button className="po-print-btn" onClick={()=>generatePDF(poData)}>
                 <i className="fas fa-print"></i>
                 Print PO
               </button>
-              <button className="po-download-btn">
+              <button className="po-download-btn" onClick={()=>downloadPDF(poData)}>
                 <i className="fas fa-download"></i>
                 Download PO
               </button>
@@ -1130,6 +1043,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
                   <th>#</th>
                   <th>SKU</th>
                   <th>Item Code</th>
+                  <th>Vendor Code</th>
                   <th>Product Description</th>
                   <th>Category</th>
                   <th>Unit Cost</th>
@@ -1144,6 +1058,7 @@ const PurchaseOrderPage = ({ vendors, items, onBack, intentData, showNotificatio
                       <td>{index + 1}</td>
                       <td><strong>{item.sku || 'N/A'}</strong></td>
                       <td>{item.itemCode || 'N/A'}</td>
+                       <td>{item.vendorCode || 'N/A'}</td>
                       <td>{item.productDescription || 'N/A'}</td>
                       <td>{item.category || 'N/A'}</td>
                       <td className="po-cost-column">₹{(parseFloat(item.unitCost || 0)).toFixed(2)}</td>

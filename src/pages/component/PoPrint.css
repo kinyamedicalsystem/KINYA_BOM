@@ -1,0 +1,961 @@
+/* =========================================================
+   A4 PAGE
+========================================================= */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+.print-page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #1e293b;
+  font-family:
+    "Segoe UI",
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 9px;
+
+  position: relative;
+
+  padding: 13mm 12mm 12mm 12mm;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   TOP ACCENT
+========================================================= */
+
+.top-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: #0f766e;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.pi-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  padding-bottom: 13px;
+
+  border-bottom: 1px solid #dbe4ea;
+}
+
+
+.company-section {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+}
+
+
+.company-logo {
+  width: 43px;
+  height: 43px;
+  border-radius: 9px;
+  background: #0f766e;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 26px;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 4px 10px rgba(15, 118, 110, 0.2);
+}
+
+.company-label h1,p{
+ margin: 0;
+ margin-bottom: 2px;
+}
+
+.company-details h1 {
+  margin: 0;
+
+  font-size: 17px;
+
+  line-height: 1;
+
+  letter-spacing: -0.3px;
+
+  color: #0f172a;
+
+  font-weight: 800;
+}
+
+
+.company-details h1 span {
+  display: block;
+
+  color: #0f766e;
+}
+
+
+.company-tagline {
+  margin: 4px 0 0;
+
+  color: #64748b;
+
+  font-size: 8px;
+
+  letter-spacing: 0.4px;
+}
+
+
+
+/* =========================================================
+   DOCUMENT SECTION
+========================================================= */
+
+.document-section {
+  text-align: right;
+}
+
+
+.document-label {
+  display: inline-block;
+
+  font-size: 8px;
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  color: #64748b;
+
+  margin-bottom: 2px;
+}
+
+
+.document-section h2 {
+  margin: 0 0 5px;
+
+  font-size: 16px;
+
+  color: #0f172a;
+
+  letter-spacing: 0.5px;
+}
+
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+
+/* =========================================================
+   DOCUMENT INFORMATION
+========================================================= */
+.document-info {
+  display: grid;
+  grid-template-columns:
+    1.2fr
+    1fr
+    0.8fr
+    1.5fr;
+  gap: 7px;
+  margin: 12px 0;
+}
+
+
+.info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 7px 9px;
+  min-height: 40px;
+}
+
+.info-label {
+  display: block;
+  color: #94a3b8;
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  margin-bottom: 3px;
+}
+
+
+.info-box strong {
+  display: block;
+  color: #334155;
+  font-size: 8px;
+}
+
+
+.requested-text {
+  color: #047857 !important;
+}
+
+
+/* =========================================================
+   SECTION HEADING
+========================================================= */
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 7px;
+}
+
+
+.section-icon {
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
+  background: #ccfbf1;
+  color: #0f766e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+
+.section-heading h3 {
+  margin: 0;
+
+  font-size: 10px;
+
+  color: #0f172a;
+
+  font-weight: 800;
+}
+
+
+.section-heading p {
+  margin: 2px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 7px;
+}
+
+/* =========================================================
+   Po Detail Header
+========================================================= */
+
+.poDetails-header{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.po-section{
+    padding: 15px 10px;
+    border-radius: 10px;
+}
+
+.po-section p:nth-child(1){
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.po-section p:nth-child(2){
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+     color: #26282dc9;
+   
+}
+.po-section p:nth-child(3){
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+     color: #26282dc9;
+}
+
+.po-section.VendorDetails{
+    text-align: end;
+}
+.po-section.VendorDetails h2{
+    font-size: 20px;
+    padding: 0;
+    font-weight: 600;
+}
+
+.po-section.VendorDetails :nth-child(2){
+    background: #2ee3b04f;
+    border-radius: 20px;
+    color: #047857;
+    display: inline;
+    padding: 4px 10px;
+}
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrapper {
+  width: 100%;
+  margin-top: 16px;
+  border: 1px solid #dbe4ea;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+
+.PoData-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  table-layout: fixed;
+}
+
+/*-------------- Column widths---------------------- */
+/*--Po--*/
+.PoData-table th:nth-child(1) {
+  width: 4%;
+}
+.PoData-table th:nth-child(2) {
+  width: 14%;
+}
+.PoData-table th:nth-child(3) {
+  width: 17%;
+}
+
+.PoData-table th:nth-child(4) {
+  width: 25%;
+}
+.PoData-table th:nth-child(5) {
+  width: 15%;
+}
+.PoData-table th:nth-child(6) {
+  width: 9%;
+}
+.PoData-table th:nth-child(7) {
+  width: 16%;
+}
+
+
+
+/* ----------Header----------------- */
+/*---Po--*/
+.PoData-table thead th {
+  background: #0f766e;
+  color: #ffffff;
+  padding: 7px 4px;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  text-align: left;
+  border-right: 1px solid rgba(255,255,255,0.15);
+}
+
+
+.PoData-table thead th:last-child {
+  border-right: none;
+}
+
+
+/* --------Body -----------*/
+/*-- Po --*/
+.PoData-table tbody td {
+  padding: 7px 4px;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+  color: #334155;
+  font-size: 7px;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.PoData-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.PoData-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+.item-number {
+  color: #64748b;
+
+  font-weight: 700;
+}
+
+
+.sku-text {
+  color: #0f172a;
+
+  font-weight: 800;
+}
+
+
+.description {
+  line-height: 1.35;
+}
+
+
+.vendor-name {
+  font-weight: 600;
+}
+
+
+.price {
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+
+.quantity {
+  font-weight: 800;
+
+  color: #0f766e !important;
+}
+
+
+.total-cost {
+  font-weight: 800;
+
+  color: #0f172a;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.category-badge {
+  display: inline-block;
+
+  max-width: 100%;
+
+  padding: 3px 5px;
+
+  border-radius: 4px;
+
+  background: #f0fdfa;
+
+  color: #0f766e;
+
+  border: 1px solid #ccfbf1;
+
+  font-size: 6px;
+
+  font-weight: 700;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ORDER LINK
+========================================================= */
+
+.order-link {
+  display: inline-block;
+
+  padding: 3px 6px;
+
+  border-radius: 4px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  border: 1px solid #bfdbfe;
+
+  text-decoration: none;
+
+  font-size: 6px;
+
+  font-weight: 800;
+}
+
+
+.no-link {
+  color: #cbd5e1;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   GRAND TOTAL
+========================================================= */
+
+.grand-total td {
+  background: #f0fdfa;
+
+  border-top: 1px solid #0f766d8b;
+
+  padding: 8px 4px;
+
+  font-weight: 700;
+}
+
+
+.grand-label {
+  color: #0f766e !important;
+
+  font-size: 7px !important;
+
+  letter-spacing: 0.5px;
+}
+
+
+.total-quantity {
+  color: #0f766e !important;
+
+  font-size: 8px !important;
+}
+
+
+.grand-cost {
+  color: #0f766e !important;
+
+  font-size: 9px !important;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.summary-section {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr 1.4fr;
+
+  gap: 7px;
+
+  margin-top: 10px;
+}
+
+
+.summary-card {
+  border: 1px solid #e2e8f0;
+
+  border-radius: 6px;
+
+  padding: 7px 9px;
+
+  background: #ffffff;
+}
+
+
+.summary-card span {
+  display: block;
+
+  color: #94a3b8;
+
+  font-size: 6px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.5px;
+
+  margin-bottom: 3px;
+}
+
+
+.summary-card strong {
+  font-size: 10px;
+
+  color: #334155;
+}
+
+
+.total-summary {
+  background: #f0fdfa;
+
+  border-color: #99f6e4;
+}
+
+
+.total-summary strong {
+  color: #0f766e;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   NOTES
+========================================================= */
+
+.notes-section {
+  display: flex;
+
+  gap: 8px;
+
+  margin-top: 12px;
+
+  padding: 9px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+
+  border-left: 3px solid #0f766e;
+
+  border-radius: 6px;
+}
+
+
+.notes-icon {
+  width: 19px;
+  height: 19px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #ccfbf1;
+
+  color: #0f766e;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 900;
+
+  font-size: 9px;
+}
+
+
+.notes-section h3 {
+  margin: 0 0 3px;
+
+  font-size: 8px;
+
+  color: #334155;
+}
+
+
+.notes-section p {
+  margin: 0;
+
+  font-size: 7px;
+
+  line-height: 1.4;
+
+  color: #64748b;
+}
+
+
+.notes-section .small-note {
+  margin-top: 3px;
+
+  color: #94a3b8;
+
+  font-size: 6.5px;
+}
+
+
+/* =========================================================
+   APPROVAL
+========================================================= */
+
+.approval-section {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  padding-top: 10px;
+  gap: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+
+.approval-header {
+  display: flex;
+  align-items: baseline;
+
+  justify-content: space-between;
+
+  margin-bottom: 15px;
+}
+
+
+.approval-header h3 {
+  margin: 0;
+
+  color: #334155;
+
+  font-size: 9px;
+
+  font-weight: 800;
+}
+
+
+.approval-header span {
+  color: #94a3b8;
+
+  font-size: 6.5px;
+}
+
+
+
+.signature-box {
+  text-align: center;
+
+  min-height: 55px;
+}
+
+
+.signature-line {
+  height: 22px;
+
+  border-bottom: 1px solid #4755699c;
+
+  margin-bottom: 5px;
+}
+
+
+.signature-box strong {
+  display: block;
+
+  color: #334155;
+
+  font-size: 7px;
+}
+
+.signature-Pd{
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.signature-box span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #64748b;
+
+  font-size: 6.5px;
+}
+
+
+.signature-box small {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #94a3b8;
+
+  font-size: 5.5px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.print-footer {
+  display: grid;
+
+  grid-template-columns:
+    1.4fr
+    1fr
+    1.4fr;
+
+  align-items: end;
+
+  gap: 10px;
+
+  margin-top: 15px;
+
+  padding-top: 8px;
+
+  border-top: 1px solid #e2e8f0;
+
+  color: #94a3b8;
+
+  font-size: 5.8px;
+}
+
+
+.print-footer strong {
+  display: block;
+
+  color: #64748b;
+
+  font-size: 6.5px;
+}
+
+
+.print-footer span {
+  display: block;
+
+  margin-top: 2px;
+}
+
+
+.footer-center {
+  text-align: center;
+}
+
+
+.footer-right {
+  text-align: right;
+}
+
+
+/* =========================================================
+   ALIGNMENT
+========================================================= */
+
+.center {
+  text-align: center !important;
+}
+
+
+.right {
+  text-align: right !important;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty-row {
+  text-align: center;
+
+  padding: 25px !important;
+
+  color: #94a3b8 !important;
+}
+
+
+/* =========================================================
+   PRINT SETTINGS
+========================================================= */
+
+@media print {
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    width: 210mm;
+
+    background: #ffffff !important;
+  }
+
+  .print-btn{
+    display: none;
+  }
+
+  .print-page {
+    margin: 0;
+    width: 210mm;
+    min-height: 297mm;
+    box-shadow: none;
+    page-break-after: always;
+  }
+
+
+  .PoData-table {
+    page-break-inside: auto;
+  }
+
+
+  .PoData-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+ /*table-header-group*/
+  .PoData-table thead {
+    display:table-row-group;
+  }
+
+
+  .Po-table tfoot {
+    display: table-row-group;
+  }
+
+
+  .notes-section,
+  .approval-section,
+  .summary-section {
+    page-break-inside: avoid;
+  }
+
+
+  a {
+    color: inherit !important;
+
+    text-decoration: none !important;
+  }
+
+
+  /* Remove browser link URL when printing */
+
+  a[href]::after {
+    content: none !important;
+  }
+}
+
+
+/* =========================================================
+   SCREEN PREVIEW
+========================================================= */
+
+@media screen {
+
+  body {
+    background: #e5e7eb;
+  }
+
+
+  .print-page {
+    margin: 25px auto;
+
+    box-shadow:
+      0 10px 35px rgba(15, 23, 42, 0.15);
+  }
+}

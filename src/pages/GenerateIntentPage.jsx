@@ -1,9 +1,12 @@
-import React, { useState, useMemo, useEffect,useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { supabase } from '../supabase';
 import html2pdf from 'html2pdf.js';
+import ReactDOMServer from "react-dom/server"
+import IntentPrint from "./component/IntentPrint"
+import PdfPrintcss from "./component/PdfPrint.css?raw"
 import "./GenerateIntentPage.css"
 
-const GenerateIntentPage = ({ items, boms , onGeneratePO, showNotification }) => {
+const GenerateIntentPage = ({ items, boms, onGeneratePO, showNotification }) => {
   const [selectedType, setSelectedType] = useState('individual');
   const [selectedIndividualItems, setSelectedIndividualItems] = useState([]);
   const [selectedBomItems, setSelectedBomItems] = useState([]);
@@ -16,9 +19,9 @@ const GenerateIntentPage = ({ items, boms , onGeneratePO, showNotification }) =>
   const [previewIntent, setPreviewIntent] = useState(null);
   const [showPreviewPopup, setShowPreviewPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-   const [showDeletePopup, setshowDeletePopup] = useState(false);
+  const [showDeletePopup, setshowDeletePopup] = useState(false);
   const [deleteIntentid, setDeleteIntentid] = useState(null);
-  const pdfRef=useRef(null)
+
 
   const filteredIndividualItems = useMemo(() =>
     items.filter(item =>
@@ -68,6 +71,7 @@ const GenerateIntentPage = ({ items, boms , onGeneratePO, showNotification }) =>
     const primaryVendor = vendors.find(v => v.primary) || vendors[0];
     return {
       vendorName: primaryVendor?.name || 'No vendor',
+      vendorCode: primaryVendor?.partCode || '',
       cost: primaryVendor?.cost || '0',
       orderLink: item.order_link || '',
       vendorId: primaryVendor?.id || ''
@@ -255,6 +259,7 @@ const GenerateIntentPage = ({ items, boms , onGeneratePO, showNotification }) =>
             product_description: item.product_description,
             category: item.category,
             vendorName: item.vendorName,
+            vendorCode: item.vendorCode,
             vendorId: item.vendorId,
             cost: item.cost,
             order_link: item.order_link,
@@ -335,222 +340,138 @@ const GenerateIntentPage = ({ items, boms , onGeneratePO, showNotification }) =>
       onGeneratePO(formattedIntentData);
     }
   };
-///Delete Each Data in History///
+
+  ///Delete Each Data in History///
   const handleDeleteIntent = async () => {
+    try {
+      const { error } = await supabase
+        .from("intents")
+        .delete()
+        .eq("id", deleteIntentid);
 
-  try {
-    const { error } = await supabase
-      .from("intents")
-      .delete()
-      .eq("id", deleteIntentid);
+      if (error) throw error;
 
-    if (error) throw error;
+      showNotification("Intent deleted successfully!", "success");
 
-    showNotification("Intent deleted successfully!", "success");
+      fetchIntentHistory();
+      setDeleteIntentid(null)
+      setshowDeletePopup(false)
 
-    fetchIntentHistory();
-    setDeleteIntentid(null)
-    setshowDeletePopup(false)
+    } catch (error) {
+      console.error("Error deleting intent:", error);
 
-  } catch (error) {
-    console.error("Error deleting intent:", error);
-
-    showNotification(
-      "Failed to delete intent",
-      "error"
-    );
-  }
-};
-
-
-const downloadPdf = async () => {
-  if (!intentData) return;
-
-  const element=pdfRef.current
-
-  const options = {
-    margin: 10,
-    filename: `${intentData.intentNumber}.pdf`,
-    image: {
-      type: 'jpeg',
-      quality: 0.98
-    },
-    html2canvas: {
-      scale: 2,
-      useCORS: true
-    },
-    jsPDF: {
-      unit: 'mm',
-      format: 'a4',
-      orientation: 'landscape'
+      showNotification(
+        "Failed to delete intent",
+        "error"
+      );
     }
   };
 
-  try {
-    await html2pdf()
-      .set(options)
-      .from(element)
-      .save();
 
-    showNotification('PDF downloaded successfully!', 'success');
-  } catch (error) {
-    console.error('PDF generation error:', error);
-    showNotification('Failed to download PDF', 'error');
-  }
-};
+  const generatePDF = async (intent) => {
+    const printContent = ReactDOMServer.renderToString(
+      <IntentPrint intentData={intent}/>
+    );
 
-  const generatePDF = async () => {
     const printWindow = window.open('', '_blank');
-    const pdfContent = `
-      <!DOCTYPE html>
+    printWindow.document.write(`
+      <!doctype html>
       <html>
       <head>
-        <title>Purchase Intent - ${intentData.intentNumber}</title>
+        <title>Purchase Intent - ${intentData.intentNumber}</title></head>
         <style>
-          body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px;
-            color: #333;
-          }
-          .company-header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid rgba(29, 29, 30, 0.59)
-            padding-bottom: 15px;
-          }
-          .company-header h1 {
-            color: #1846bc;
-            margin: 0;
-            font-size: 28px;
-          }
-          .company-header h2 {
-            color: #555;
-            margin: 5px 0;
-            font-size: 18px;
-          }
-          .intent-header { 
-            text-align: center; 
-            margin-bottom: 20px;
-          }
-          .intent-header h3 { 
-            color:  #1846bc; 
-            margin: 0;
-            font-size: 24px;
-          }
-          .intent-meta { 
-            display: flex; 
-            justify-content: space-between;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-          }
-          .intent-table { 
-            width: 100%; 
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 12px;
-          }
-          .intent-table th, .intent-table td { 
-            border: 1px solid #ddd; 
-            padding: 8px;
-            text-align: left;
-          }
-          .intent-table th { 
-            background-color:  #1846bc; 
-            color: white;
-            font-weight: bold;
-          }
-          .intent-table tr:nth-child(even) {
-            background-color: #f8f9fa;
-          }
-          .total-row {
-            font-weight: bold;
-            background-color: #e9ecef !important;
-          }
-          .cost-column {
-            text-align: right;
-          }
-          .quantity-column {
-            text-align: center;
-          }
-          @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
-            .intent-table { font-size: 10px; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="company-header">
-          <h1>KINYA MEDICAL SYSTEM</h1>
-          <h2>Purchase Department</h2>
-        </div>
-        <div class="intent-header">
-          <h3>PURCHASE INTENT - ${intentData.intentNumber}</h3>
-          <div class="intent-meta">
-            <p><strong>Generated Date:</strong> ${new Date(intentData.generatedAt).toLocaleDateString()}</p>
-            <p><strong>Total Items:</strong> ${intentData.totalItems}</p>
-            <p><strong>Total Quantity:</strong> ${intentData.totalQuantity}</p>
-            <p><strong>Total Cost:</strong> ₹${intentData.totalCost.toFixed(2)}</p>
-          </div>
-        </div>
-        <table class="intent-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>SKU</th>
-              <th>Item Code</th>
-              <th>Product Description</th>
-              <th>Category</th>
-              <th>Vendor</th>
-              <th>Unit Cost</th>
-              <th>Quantity</th>
-              <th>Total Cost</th>
-              <th>Order Link</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${intentData.items.map((item, index) => `
-              <tr>
-                <td>${index + 1}</td>
-                <td>${item.sku}</td>
-                <td>${item.itemCode || item.item_code}</td>
-                <td>${item.productDescription || item.product_description}</td>
-                <td>${item.category}</td>
-                <td>${item.vendorName}</td>
-                <td class="cost-column">₹${item.cost}</td>
-                <td class="quantity-column">${item.quantity}</td>
-                <td class="cost-column">₹${(parseFloat(item.cost) * item.quantity).toFixed(2)}</td>
-                <td>${item.orderLink || item.order_link || 'N/A'}</td>
-              </tr>
-            `).join('')}
-            <tr class="total-row">
-              <td colspan="6" style="text-align: right;"><strong>Grand Totals:</strong></td>
-              <td class="cost-column"><strong>₹${intentData.items.reduce((sum, item) => sum + parseFloat(item.cost), 0).toFixed(2)}</strong></td>
-              <td class="quantity-column"><strong>${intentData.totalQuantity}</strong></td>
-              <td class="cost-column"><strong>₹${intentData.totalCost.toFixed(2)}</strong></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-        <div style="margin-top: 30px; text-align: center; color: #666;">
-          <p>Generated on: ${new Date(intentData.generatedAt).toLocaleString()}</p>
-        </div>
+         ${PdfPrintcss}
+
+         .print-btn{
+             background: #168cf4;
+             padding: 9px 10px;
+             border: none;
+             border-radius: 5px;
+             color: white;
+         }
+
+            </style>
+          <body>
+
+        <button class="print-btn" onclick="window.print()">
+              <i class="fa-solid fa-file-invoice "></i> Print PDF
+        </button>
+
+        ${printContent}
+
+      </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+
+  };
+
+  
+    const downloadPDF = async (Intent) => {
+   try {
+    const printContent = ReactDOMServer.renderToString(
+      <IntentPrint intentData={Intent} />
+    );
+
+    const container = document.createElement("div");
+    container.innerHTML = `
+    <!doctype html>
+     <html>
+      <style>
+        ${PdfPrintcss}
+      </style>
+    <body>
+      ${printContent}
       </body>
       </html>
     `;
 
-    printWindow.document.write(pdfContent);
-    printWindow.document.close();
+    document.body.appendChild(container);
 
-    printWindow.print();
-  };
+    const pdfElement = container;
 
+    console.log(pdfElement);
 
-  const handlePrint = () => {
-    generatePDF();
-  };
+    const options = {
+      margin: 0,
+
+      filename: `${intentData.intentNumber || "Intent"}.pdf`,
+
+      image: {
+        type: "jpeg",
+        quality: 0.98
+      },
+
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff"
+      },
+
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      },
+
+      pagebreak: {
+        mode: ["css", "legacy"]
+      }
+    };
+
+    await html2pdf()
+      .set(options)
+      .from(pdfElement)
+      .save();
+
+    document.body.removeChild(container);
+
+  } catch (error) {
+    console.error("Error downloading PDF:", error);
+    showNotification("Failed to download Purchase Order PDF", "error");
+  }
+};
 
   const handlePreviewIntent = (intent) => {
     console.log('Previewing intent:', intent);
@@ -580,6 +501,7 @@ const downloadPdf = async () => {
         productDescription: item.productDescription || item.product_description || '',
         category: item.category || '',
         vendorName: item.vendorName || item.vendor_name || 'No Vendor',
+        vendorCode: item.vendorCode || 'No Vendor',
         cost: item.cost || item.unitCost || '0',
         quantity: item.quantity || 1,
         orderLink: item.orderLink || item.order_link || ''
@@ -634,8 +556,8 @@ const downloadPdf = async () => {
           </div>
         </div>
       )}
-       
-        {showDeletePopup && (
+
+      {showDeletePopup && (
         <div className="intent-popup-overlay">
           <div className="intent-popup-content success-popup">
             <div className="intent-popup-icon delete">
@@ -646,7 +568,8 @@ const downloadPdf = async () => {
             <div className="intent-popup-actions">
               <button
                 className="intent-btn intent-btn-secondary"
-                onClick={()=>{setDeleteIntentid(null);
+                onClick={() => {
+                  setDeleteIntentid(null);
                   setshowDeletePopup(false)
                 }}
               >
@@ -656,7 +579,7 @@ const downloadPdf = async () => {
                 className="intent-btn intent-btn-danger"
                 onClick={handleDeleteIntent}
               >
-               Delete
+                Delete
               </button>
             </div>
           </div>
@@ -717,7 +640,7 @@ const downloadPdf = async () => {
                             <td>{item.itemCode}</td>
                             <td>{item.productDescription}</td>
                             <td><span className="intent-category-tag">{item.category}</span></td>
-                            <td>{item.vendorName}</td>
+                            <td className='vendorInfo'>{item.vendorName} {item.vendorCode ? <span>{item.vendorCode}</span>:""}</td>
                             <td className="intent-cost-column">₹{item.cost}</td>
                             <td className="intent-quantity-column"><span className="intent-quantity-badge">{item.quantity}</span></td>
                             <td className="intent-cost-column">₹{(parseFloat(item.cost) * (item.quantity || 1)).toFixed(2)}</td>
@@ -972,7 +895,7 @@ const downloadPdf = async () => {
                             <td>{item.item_code}</td>
                             <td>{item.product_description}</td>
                             <td>{item.category}</td>
-                            <td>{vendorInfo.vendorName}</td>
+                            <td className='vendorInfo'>{vendorInfo.vendorName} <span>{vendorInfo.vendorCode}</span></td>
                             <td>₹{vendorInfo.cost}</td>
                             <td className="intent-truncate">{item.order_link || 'N/A'}</td>
                             <td>
@@ -1066,7 +989,7 @@ const downloadPdf = async () => {
                                     <td>{item.item_code}</td>
                                     <td>{item.product_description}</td>
                                     <td>{item.category}</td>
-                                    <td>{vendorInfo.vendorName}</td>
+                                    <td className='vendorInfo'>{vendorInfo.vendorName} <span>{vendorInfo.vendorCode}</span></td>
                                     <td>₹{vendorInfo.cost}</td>
                                     <td className="intent-truncate">{item.order_link || 'N/A'}</td>
                                     <td>
@@ -1156,7 +1079,7 @@ const downloadPdf = async () => {
                         <td>{item.item_code}</td>
                         <td>{item.product_description}</td>
                         <td>{item.category}</td>
-                        <td>{item.vendorName}</td>
+                        <td className="vendorInfo">{item.vendorName} <span>{item.vendorCode}</span></td>
                         <td>₹{item.cost}</td>
                         <td className="intent-truncate">{item.order_link || 'N/A'}</td>
                         <td>
@@ -1189,7 +1112,7 @@ const downloadPdf = async () => {
                         <td>{item.item_code}</td>
                         <td>{item.product_description}</td>
                         <td>{item.category}</td>
-                        <td>{item.vendorName}</td>
+                        <td className="vendorInfo">{item.vendorName} <span>{item.vendorCode}</span></td>
                         <td>₹{item.cost}</td>
                         <td className="intent-truncate">{item.order_link || 'N/A'}</td>
                         <td>
@@ -1239,13 +1162,13 @@ const downloadPdf = async () => {
           <div className="intent-preview-header">
             <h3><i className="fas fa-file-invoice"></i>Purchase Intent Preview - {intentData.intentNumber}</h3>
             <div className="intent-preview-actions">
-              <button className="intent-print-btn" onClick={handlePrint}>
+              <button className="intent-print-btn" onClick={() => generatePDF(intentData)}>
                 <i className="fas fa-print"></i>
                 Print Intent
               </button>
-    
-              <button className="intent-download-btn">
-                <i className="fas fa-download" onClick={downloadPdf}></i>
+
+              <button className="intent-download-btn" onClick={()=>downloadPDF(intentData)}>
+                <i className="fas fa-download"></i>
                 Download
               </button>
               <button className="intent-back-btn" onClick={() => setIntentData(null)}>
@@ -1259,7 +1182,7 @@ const downloadPdf = async () => {
             </div>
           </div>
 
-          <div className="intent-content"  ref={pdfRef}>
+          <div className="intent-content">
             <div className="intent-company-header">
               <h1>KINYA MEDICAL SYSTEM</h1>
               <h2>Purchase Department</h2>
@@ -1295,7 +1218,7 @@ const downloadPdf = async () => {
                     <td>{item.itemCode || item.item_code}</td>
                     <td>{item.productDescription || item.product_description}</td>
                     <td><span className="intent-category-tag">{item.category}</span></td>
-                    <td>{item.vendorName}</td>
+                    <td className='vendorInfo'>{item.vendorName} <span>{item.vendorCode}</span></td>
                     <td className="intent-cost-column">₹{item.cost}</td>
                     <td className="intent-quantity-column"><span className="intent-quantity-badge">{item.quantity}</span></td>
                     <td className="intent-cost-column">₹{(parseFloat(item.cost) * item.quantity).toFixed(2)}</td>
